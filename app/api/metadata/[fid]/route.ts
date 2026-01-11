@@ -8,9 +8,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { fid: string } }
+  { params }: { params: Promise<{ fid: string }> }
 ) {
-  const fid = Number(params.fid);
+  const resolvedParams = await params;
+  const fid = Number(resolvedParams.fid);
   if (!fid || Number.isNaN(fid)) {
     return NextResponse.json({ error: "Invalid fid" }, { status: 400 });
   }
