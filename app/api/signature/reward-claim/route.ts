@@ -38,7 +38,9 @@ export async function POST(request: NextRequest) {
   try {
     const account = privateKeyToAccount(SERVER_PRIVATE_KEY as `0x${string}`);
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 15 * 60);
-    const nonce = BigInt(Date.now()) * 1000000n + BigInt(Math.floor(Math.random() * 1000000));
+    const nonce =
+      BigInt(Date.now()) * BigInt(1000000) +
+      BigInt(Math.floor(Math.random() * 1000000));
     const amount = BigInt(REWARD_AMOUNT);
 
     const signature = await account.signTypedData({
