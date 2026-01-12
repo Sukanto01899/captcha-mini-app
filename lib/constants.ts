@@ -25,9 +25,9 @@ export const APP_WEBHOOK_URL = `${APP_URL}/api/webhook`;
 export const APP_ACCOUNT_ASSOCIATION = {
   header:
     "eyJmaWQiOjMxNzI2MSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDQ5ZWUzMjNFYTFCYjY1RjY4RkE3NWRmMGM2RDQ0MWQyMGQ4M0E4Q2QifQ",
-  payload: "eyJkb21haW4iOiJodHRwczovL2NhcHRjaGFpZC52ZXJjZWwuYXBwLyJ9",
+  payload: "eyJkb21haW4iOiJjYXB0Y2hhaWQudmVyY2VsLmFwcCJ9",
   signature:
-    "8u6ldsgtbK+RDZDohNI1Q7OtF1KaX0I8J9sxKBsp8Jl8aYEPU6KOAQo05dLXNQjlPTGEUt6j7mqBZAhgQsBWGRs=",
+    "Innlw+wA1SR2E0SrHGDZczAd0dtMPsW99/79xS9zy18G6w/0sU8xWwpr5ieEIuLm2MI6NTcDtYPAEieMlZZNyxs=",
 };
 
 export const notificationsBtn = [
