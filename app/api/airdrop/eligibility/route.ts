@@ -160,10 +160,11 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  const tokenDecimals = BigInt(10) ** BigInt(18)
   const minPointsWei =
     typeof onchainMinPoints === 'bigint'
       ? onchainMinPoints
-      : BigInt(minPoints) * 10n ** 18n
+      : BigInt(minPoints) * tokenDecimals
   if (BigInt(balance) < minPointsWei) {
     return NextResponse.json(
       { eligible: false, error: 'Not enough points' },
