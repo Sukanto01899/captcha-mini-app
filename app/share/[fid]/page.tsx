@@ -1,8 +1,10 @@
-import { APP_DESCRIPTION, APP_NAME, APP_URL } from "@/lib/constants";
-import { getMiniAppEmbedMetadata } from "@/lib/utils";
-import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-export const revalidate = 300;
+import { APP_DESCRIPTION, APP_NAME, APP_URL } from '@/lib/constants'
+import { getMiniAppEmbedMetadata } from '@/lib/utils'
+import type { Metadata } from 'next'
+import { headers } from 'next/headers'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 // This is an example of how to generate a dynamically generated share page based on fid:
 // Sharing this route e.g. exmaple.com/share/123 will generate a share page for fid 123,
@@ -10,10 +12,14 @@ export const revalidate = 300;
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ fid: string }>;
+  params: { fid: string }
 }): Promise<Metadata> {
-  const { fid } = await params;
-  const imageUrl = `${APP_URL}/api/og/humanid?fid=${fid}`;
+  const { fid } = params
+  const headerList = headers()
+  const host = headerList.get('x-forwarded-host') ?? headerList.get('host')
+  const proto = headerList.get('x-forwarded-proto') ?? 'https'
+  const baseUrl = host ? `${proto}://${host}` : APP_URL
+  const imageUrl = `${baseUrl}/api/og/humanid?fid=${fid}`
 
   return {
     title: `${APP_NAME} - Share`,
@@ -22,13 +28,27 @@ export async function generateMetadata({
       description: APP_DESCRIPTION,
       images: [{ url: imageUrl, width: 600, height: 400 }],
     },
-    other: {
-      "fc:frame": JSON.stringify(getMiniAppEmbedMetadata(imageUrl)),
+    twitter: {
+      card: 'summary_large_image',
+      title: APP_NAME,
+      description: APP_DESCRIPTION,
+      images: [imageUrl],
     },
-  };
+    other: {
+      'fc:frame': JSON.stringify(getMiniAppEmbedMetadata(imageUrl)),
+    },
+  }
 }
 
 export default function SharePage() {
-  // redirect to home page
-  redirect("/");
+  return (
+    <main className="min-h-screen bg-background text-primary flex items-center justify-center p-6">
+      <div className="text-center space-y-2">
+        <p className="text-lg">HUMAN ID CARD</p>
+        <p className="text-xs text-secondary">
+          Open this link inside the app to mint.
+        </p>
+      </div>
+    </main>
+  )
 }

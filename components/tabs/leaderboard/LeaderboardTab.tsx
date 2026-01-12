@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 export function LeaderboardTab() {
   return (
@@ -6,5 +6,5 @@ export function LeaderboardTab() {
       <p className="text-xs text-secondary">LEADERBOARD</p>
       <p className="mt-2">Coming soon. Earn points to climb.</p>
     </div>
-  );
+  )
 }

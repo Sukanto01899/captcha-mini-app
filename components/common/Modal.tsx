@@ -1,13 +1,13 @@
-import { type ReactNode } from "react";
-import { Button } from "./Button";
+import type { ReactNode } from 'react'
+import { Button } from './Button'
 
 interface ModalProps {
-  title: string;
-  description?: string;
-  isOpen: boolean;
-  onClose: () => void;
-  actionSlot?: ReactNode;
-  children: ReactNode;
+  title: string
+  description?: string
+  isOpen: boolean
+  onClose: () => void
+  actionSlot?: ReactNode
+  children: ReactNode
 }
 
 export function Modal({
@@ -18,7 +18,7 @@ export function Modal({
   actionSlot,
   children,
 }: ModalProps) {
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur">
@@ -30,13 +30,20 @@ export function Modal({
               <p className="mt-1 text-sm text-slate-300">{description}</p>
             ) : null}
           </div>
-          <Button variant="ghost" size="icon" aria-label="Close" onClick={onClose}>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Close"
+            onClick={onClose}
+          >
             ×
           </Button>
         </div>
         <div className="mt-4 text-slate-100">{children}</div>
-        {actionSlot ? <div className="mt-6 flex justify-end gap-3">{actionSlot}</div> : null}
+        {actionSlot ? (
+          <div className="mt-6 flex justify-end gap-3">{actionSlot}</div>
+        ) : null}
       </div>
     </div>
-  );
+  )
 }

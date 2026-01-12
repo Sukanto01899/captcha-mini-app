@@ -1,8 +1,8 @@
-import { getFarcasterDomainManifest } from "../../../lib/utils";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server'
+import { getFarcasterDomainManifest } from '../../../lib/utils'
 
 export async function GET() {
-  const farcasterConfig = await getFarcasterDomainManifest();
+  const farcasterConfig = await getFarcasterDomainManifest()
 
-  return NextResponse.json(farcasterConfig);
+  return NextResponse.json(farcasterConfig)
 }

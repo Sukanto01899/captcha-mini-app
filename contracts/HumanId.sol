@@ -9,12 +9,15 @@ contract HumanId is ERC721, Ownable {
     using Strings for uint256;
 
     string private baseTokenURI;
+    uint256 public mintPrice = 0.0001 ether;
     mapping(uint256 => bool) private mintedByFid;
     mapping(address => bool) private mintedByAddress;
     mapping(uint256 => string) private humanIdByFid;
 
     event HumanIdMinted(address indexed to, uint256 indexed fid, string humanId, uint256 pricePaid);
+    event HumanIdUpdated(address indexed to, uint256 indexed fid, string humanId, uint256 pricePaid);
     event BaseURIUpdated(string newBaseURI);
+    event MintPriceUpdated(uint256 newPrice);
     event Withdrawn(address indexed to, uint256 amount);
 
     constructor(string memory name_, string memory symbol_, string memory baseURI_)
@@ -25,7 +28,13 @@ contract HumanId is ERC721, Ownable {
     }
 
     function mintSelf(uint256 fid, string calldata humanId) external payable {
-        require(msg.value == 0.0001 ether, "HumanId: price is 0.0001 ETH");
+        require(msg.value == mintPrice, "HumanId: incorrect price");
+        if (mintedByFid[fid]) {
+            require(_ownerOf(fid) == msg.sender, "HumanId: not token owner");
+            humanIdByFid[fid] = humanId;
+            emit HumanIdUpdated(msg.sender, fid, humanId, msg.value);
+            return;
+        }
         _mintWithFid(msg.sender, fid, humanId, msg.value);
     }
 
@@ -40,6 +49,11 @@ contract HumanId is ERC721, Ownable {
     function setBaseURI(string calldata newBaseURI) external onlyOwner {
         baseTokenURI = newBaseURI;
         emit BaseURIUpdated(newBaseURI);
+    }
+
+    function setMintPrice(uint256 newPrice) external onlyOwner {
+        mintPrice = newPrice;
+        emit MintPriceUpdated(newPrice);
     }
 
     function withdraw(address payable to) external onlyOwner {

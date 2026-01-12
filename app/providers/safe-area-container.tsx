@@ -1,11 +1,11 @@
-import type { SafeAreaInsets } from "@/types";
+import type { SafeAreaInsets } from '@/types'
 
 interface SafeAreaContainerProps {
-  children: React.ReactNode;
-  insets?: SafeAreaInsets;
+  children: React.ReactNode
+  insets?: SafeAreaInsets
 }
 
-const background = "#020617";
+const background = '#020617'
 
 export const SafeAreaContainer = ({
   children,
@@ -18,10 +18,10 @@ export const SafeAreaContainer = ({
       marginLeft: insets?.left ?? 0,
       marginRight: insets?.right ?? 0,
       background: background,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
     }}
   >
     {children}
   </main>
-);
+)

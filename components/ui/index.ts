@@ -1,2 +1,2 @@
-export { App } from "./App";
-export { LoadingPage } from "./LoadingPage";
+export { App } from './App'
+export { LoadingPage } from './LoadingPage'

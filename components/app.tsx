@@ -1,19 +1,19 @@
-"use client";
+'use client'
 
-import { App, LoadingPage } from "@/components/ui";
-import { useFrame } from "@/app/providers/farcaster-provider";
-import { SafeAreaContainer } from "@/app/providers/safe-area-container";
-import { Toaster } from "react-hot-toast";
+import { useFrame } from '@/app/providers/farcaster-provider'
+import { SafeAreaContainer } from '@/app/providers/safe-area-container'
+import { App, LoadingPage } from '@/components/ui'
+import { Toaster } from 'react-hot-toast'
 
 export default function Home() {
-  const { context, isLoading, isSDKLoaded } = useFrame();
+  const { context, isLoading, isSDKLoaded } = useFrame()
 
   if (isLoading) {
     return (
       <SafeAreaContainer insets={context?.client.safeAreaInsets}>
         <LoadingPage />
       </SafeAreaContainer>
-    );
+    )
   }
 
   if (!isSDKLoaded) {
@@ -25,7 +25,7 @@ export default function Home() {
           </h1>
         </div>
       </SafeAreaContainer>
-    );
+    )
   }
 
   return (
@@ -35,5 +35,5 @@ export default function Home() {
         <Toaster position="top-center" />
       </div>
     </SafeAreaContainer>
-  );
+  )
 }

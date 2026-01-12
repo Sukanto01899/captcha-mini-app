@@ -1,13 +1,3 @@
-import {
-  AwardIcon,
-  CheckCircle,
-  MessageSquare,
-  Sparkles,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
-import { defineChain } from "viem";
-
 export const MESSAGE_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30; // 30 day
 
 const defaultUrl =
@@ -21,70 +11,24 @@ const defaultUrl =
 
 export const APP_URL = defaultUrl;
 
-export const APP_NAME = "Retro Captcha Arcade";
+export const APP_NAME = "Captcha";
 export const APP_DESCRIPTION =
-  "Retro-styled captcha mini-app for Farcaster: verify once, mint a HumanID badge, earn XP and meme tokens on Base.";
+  "Verify once, mint a HumanID badge, earn PTS and meme tokens on Base.";
 export const APP_OG_IMAGE_URL = `${APP_URL}/feed.png`;
-export const APP_BUTTON_TEXT = "Launch Captcha";
+export const APP_BUTTON_TEXT = "Get Human ID";
 export const APP_SPLASH_URL = `${APP_URL}/splash.png`;
 export const APP_ICON_URL = `${APP_URL}/icon.png`;
 export const APP_SPLASH_BACKGROUND_COLOR = "#0d0820";
-export const APP_PRIMARY_CATEGORY = "security";
-export const APP_TAGS = [
-  "captcha",
-  "security",
-  "farcaster",
-  "base",
-  "retro",
-  "humanid",
-];
+export const APP_PRIMARY_CATEGORY = "games";
+export const APP_TAGS = ["captcha", "security", "farcaster", "base", "humanid"];
 export const APP_WEBHOOK_URL = `${APP_URL}/api/webhook`;
 export const APP_ACCOUNT_ASSOCIATION = {
   header:
     "eyJmaWQiOjMxNzI2MSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDQ5ZWUzMjNFYTFCYjY1RjY4RkE3NWRmMGM2RDQ0MWQyMGQ4M0E4Q2QifQ",
-  payload: "eyJkb21haW4iOiJmYXJzdGF0ZS52ZXJjZWwuYXBwIn0",
+  payload: "eyJkb21haW4iOiJodHRwczovL2NhcHRjaGFpZC52ZXJjZWwuYXBwLyJ9",
   signature:
-    "TAFouFoy5C5A5APwUo+lvqNqvNj/RuSC9DCZ2eeFAwZgbQwABnOPl9+WcoYE4Z0PvC0ycFEJxYQQdidCGZwL5hw=",
+    "8u6ldsgtbK+RDZDohNI1Q7OtF1KaX0I8J9sxKBsp8Jl8aYEPU6KOAQo05dLXNQjlPTGEUt6j7mqBZAhgQsBWGRs=",
 };
-
-export const castCategories = [
-  {
-    id: 1,
-    name: "Tech News",
-    icon: Zap,
-    color: "border-purple-600",
-  },
-  {
-    id: 2,
-    name: "Crypto Updates",
-    icon: TrendingUp,
-    color: "border-purple-600",
-  },
-  {
-    id: 3,
-    name: "Motivational",
-    icon: AwardIcon,
-    color: "border-purple-600",
-  },
-  {
-    id: 4,
-    name: "Community",
-    icon: MessageSquare,
-    color: "border-purple-600",
-  },
-  {
-    id: 5,
-    name: "Meme",
-    icon: Sparkles,
-    color: "border-purple-600",
-  },
-  {
-    id: 6,
-    name: "Question",
-    icon: CheckCircle,
-    color: "border-purple-600",
-  },
-];
 
 export const notificationsBtn = [
   {
@@ -118,22 +62,3 @@ export const notificationsBtn = [
     body: "Mint another HumanID card and share it anywhere.",
   },
 ];
-
-export const Monad = defineChain({
-  id: 143,
-  name: "Monad",
-  nativeCurrency: {
-    decimals: 18,
-    name: "Monad",
-    symbol: "MON",
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://rpc.monad.xyz"],
-      webSocket: ["wss://rpc.monad.xyz"],
-    },
-  },
-  blockExplorers: {
-    default: { name: "Explorer", url: "https://monadscan.com" },
-  },
-});

@@ -1,22 +1,22 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/common/Button";
-import { ShareCast } from "@/components/common/ShareCast";
-import { Trophy, Lock } from "lucide-react";
+import { ShareCast } from '@/components/common/ShareCast'
+import { Lock, Trophy } from 'lucide-react'
+import type { ComponentProps } from 'react'
 
-const pixelButtonStyle = { boxShadow: "4px 4px 0px #000" } as const;
+type ShareCastConfig = ComponentProps<typeof ShareCast>['cast']
 
 interface HumanIdCardProps {
-  minted: boolean;
-  mintedHumanId: string | null;
-  displayName?: string;
-  username?: string;
-  pfp?: string;
-  gameOver: boolean;
-  isMinting: boolean;
-  onboardingReady: boolean;
-  shareCastConfig: any;
-  onMint: () => void;
+  minted: boolean
+  mintedHumanId: string | null
+  displayName?: string
+  username?: string
+  pfp?: string
+  humanScore?: number
+  isMinting: boolean
+  onboardingReady: boolean
+  shareCastConfig: ShareCastConfig | null
+  onMint: () => void
 }
 
 export function HumanIdCard({
@@ -25,7 +25,7 @@ export function HumanIdCard({
   displayName,
   username,
   pfp,
-  gameOver,
+  humanScore,
   isMinting,
   onboardingReady,
   shareCastConfig,
@@ -56,12 +56,15 @@ export function HumanIdCard({
                 <div className="text-left">
                   <p className="text-xs text-secondary">HUMAN ID</p>
                   <p className="text-sm font-bold text-primary">
-                    {mintedHumanId || "ONCHAIN CARD"}
+                    {mintedHumanId || 'ONCHAIN CARD'}
                   </p>
                   <p className="text-[10px] text-white">
-                    {displayName || "UNKNOWN"} @{username || "anon"}
+                    {displayName || 'UNKNOWN'} @{username || 'anon'}
                   </p>
                 </div>
+              </div>
+              <div className="mt-3 rounded-md border-2 border-border bg-background p-3 text-[10px] text-secondary">
+                <p className="text-primary">HUMAN SCORE: {humanScore ?? 0}</p>
               </div>
             </div>
           ) : (
@@ -71,33 +74,18 @@ export function HumanIdCard({
             </div>
           )}
         </div>
-        <div className="mt-2 flex flex-wrap gap-2 text-[10px]">
-          <Button
-            onClick={onMint}
-            disabled={minted || gameOver || isMinting || !onboardingReady}
-            className="flex-1"
-            style={pixelButtonStyle}
-          >
-            START (MINT)
-          </Button>
-          <Button
-            variant="ghost"
-            className="flex-1 border-4 border-border text-secondary"
-            style={pixelButtonStyle}
-          >
-            SELECT (SKIP)
-          </Button>
-          {shareCastConfig ? (
+        {shareCastConfig ? (
+          <div className="mt-2 text-[10px]">
             <ShareCast
               buttonText="SHARE"
               className="w-full border-4 border-border text-primary bg-card"
               cast={shareCastConfig}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     </div>
-  );
+  )
 }
 
 function ShareCastIcon() {
@@ -106,8 +94,11 @@ function ShareCastIcon() {
       className="h-4 w-4 text-[#ff004d]"
       viewBox="0 0 24 24"
       fill="currentColor"
+      role="img"
+      aria-label="Share cast"
     >
+      <title>Share cast</title>
       <path d="M18 8a3 3 0 1 0-2.83-4H12v5h3.17A3 3 0 0 0 18 8Zm0 2a4.98 4.98 0 0 1-3.584-1.5H11V21h2v-6a3 3 0 1 1 3 3h-1v2h1a5 5 0 0 0 0-10Z" />
     </svg>
-  );
+  )
 }

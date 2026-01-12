@@ -1,67 +1,81 @@
-import { NextRequest, NextResponse } from "next/server";
-export const dynamic = "force-dynamic";
+import { type NextRequest, NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 
 import {
-  CaptchaChallenge,
+  type CaptchaChallenge,
   createCaptchaChallenge,
   verifyCaptchaToken,
-} from "@/lib/captcha";
+} from '@/lib/captcha'
+import { redis } from '@/lib/upstash'
 
 export type CaptchaGenerationResponse = {
-  challenge: CaptchaChallenge;
-};
+  challenge: CaptchaChallenge
+}
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  if (searchParams.get("status")) {
+  const { searchParams } = new URL(request.url)
+  if (searchParams.get('status')) {
     // Placeholder status endpoint; replace with Redis-backed daily limit check.
     return NextResponse.json({
-      livesRemaining: 5,
       points: 0,
       minted: false,
-    });
+    })
   }
-  const variantParam = searchParams.get("variant");
-  const allowed = ["retro-grid", "signal-noise", "warp", "matrix"] as const;
+  const variantParam = searchParams.get('variant')
+  const allowed = ['retro-grid', 'signal-noise', 'warp', 'matrix'] as const
   const variant = allowed.includes(variantParam as (typeof allowed)[number])
     ? (variantParam as (typeof allowed)[number])
-    : "retro-grid";
+    : 'retro-grid'
 
-  const challenge = createCaptchaChallenge(variant);
+  const challenge = createCaptchaChallenge(variant)
 
-  return NextResponse.json({ challenge } satisfies CaptchaGenerationResponse);
+  return NextResponse.json({ challenge } satisfies CaptchaGenerationResponse)
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  const body = await request.json()
   const { id, token, answer } = body as {
-    id?: string;
-    token?: string;
-    answer?: string;
-  };
+    id?: string
+    token?: string
+    answer?: string
+    fid?: number
+    userAddress?: string
+  }
 
   if (!id || !token || !answer) {
     return NextResponse.json(
-      { ok: false, error: "missing_fields" },
-      { status: 400 }
-    );
+      { ok: false, error: 'missing_fields' },
+      { status: 400 },
+    )
   }
 
-  const verification = verifyCaptchaToken({ id, token, answer });
+  const verification = verifyCaptchaToken({ id, token, answer })
 
   if (!verification.ok) {
     return NextResponse.json(
       { ok: false, error: verification.reason },
-      { status: 400 }
-    );
+      { status: 400 },
+    )
   }
 
-  const mintedAt = Date.now();
-  const humanId = `HUM-${id.slice(0, 4)}-${mintedAt.toString().slice(-6)}`;
+  const mintedAt = Date.now()
+  const humanId = `HUM-${id.slice(0, 4)}-${mintedAt.toString().slice(-6)}`
+  let claimToken: string | null = null
+
+  if (body.fid && body.userAddress) {
+    claimToken = crypto.randomUUID()
+    const key = `captcha:claim:${body.fid}`
+    await redis.set(
+      key,
+      JSON.stringify({ token: claimToken, address: body.userAddress }),
+      { ex: 600 },
+    )
+  }
 
   return NextResponse.json({
     ok: true,
     humanId,
     mintedAt,
-  });
+    claimToken,
+  })
 }

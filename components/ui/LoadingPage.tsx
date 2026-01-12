@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 export function LoadingPage() {
   return (
@@ -11,7 +11,7 @@ export function LoadingPage() {
         Loading the captcha arcade for humans only.
       </p>
     </div>
-  );
+  )
 }
 
-export default LoadingPage;
+export default LoadingPage

@@ -1,57 +1,57 @@
-import type { Context } from "@farcaster/miniapp-sdk";
-import sdk from "@farcaster/miniapp-sdk";
-import { useQuery } from "@tanstack/react-query";
-import { type ReactNode, createContext, useContext, useState } from "react";
+import type { Context } from '@farcaster/miniapp-sdk'
+import sdk from '@farcaster/miniapp-sdk'
+import { useQuery } from '@tanstack/react-query'
+import { type ReactNode, createContext, useContext, useState } from 'react'
 
 export enum Tab {
-  Captcha = "captcha",
-  Profile = "profile",
-  Leaderboard = "leaderboard",
-  Airdrop = "airdrop",
+  Captcha = 'captcha',
+  Profile = 'profile',
+  Leaderboard = 'leaderboard',
+  Airdrop = 'airdrop',
 }
 
 interface FrameContextValue {
-  context: Context.MiniAppContext | undefined;
-  isLoading: boolean;
-  isSDKLoaded: boolean;
-  isEthProviderAvailable: boolean;
-  actions: typeof sdk.actions | undefined;
-  haptics: typeof sdk.haptics | undefined;
-  tab: Tab;
-  setTab: (page: Tab) => void;
-  quickAuth: typeof sdk.quickAuth | undefined;
+  context: Context.MiniAppContext | undefined
+  isLoading: boolean
+  isSDKLoaded: boolean
+  isEthProviderAvailable: boolean
+  actions: typeof sdk.actions | undefined
+  haptics: typeof sdk.haptics | undefined
+  tab: Tab
+  setTab: (page: Tab) => void
+  quickAuth: typeof sdk.quickAuth | undefined
 }
 
 const FrameProviderContext = createContext<FrameContextValue | undefined>(
-  undefined
-);
+  undefined,
+)
 
 export function useFrame() {
-  const context = useContext(FrameProviderContext);
+  const context = useContext(FrameProviderContext)
   if (context === undefined) {
-    throw new Error("useFrame must be used within a FrameProvider");
+    throw new Error('useFrame must be used within a FrameProvider')
   }
-  return context;
+  return context
 }
 
 interface FrameProviderProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export function FrameProvider({ children }: FrameProviderProps) {
-  const [tab, setTab] = useState<Tab>(Tab.Captcha);
+  const [tab, setTab] = useState<Tab>(Tab.Captcha)
   const farcasterContextQuery = useQuery({
-    queryKey: ["farcaster-context"],
+    queryKey: ['farcaster-context'],
     queryFn: async () => {
       // Avoid getting stuck indefinitely waiting for SDK context/ready on slow webviews (e.g. iOS).
       const context = await Promise.race([
         sdk.context,
         new Promise<undefined>((resolve) =>
-          setTimeout(() => resolve(undefined), 3000)
+          setTimeout(() => resolve(undefined), 3000),
         ),
-      ] as const);
+      ] as const)
 
-      let isReady = false;
+      let isReady = false
       if (context) {
         try {
           // Some hosts may stall on actions.ready(); race it against a timeout too.
@@ -59,25 +59,25 @@ export function FrameProvider({ children }: FrameProviderProps) {
           isReady = await Promise.race([
             sdk.actions.ready().then(() => true),
             new Promise<boolean>((resolve) =>
-              setTimeout(() => resolve(false), 3000)
+              setTimeout(() => resolve(false), 3000),
             ),
-          ] as const);
+          ] as const)
         } catch (err) {
-          console.error("SDK initialization error:", err);
-          isReady = false;
+          console.error('SDK initialization error:', err)
+          isReady = false
         }
       } else {
         // Context was not available quickly; it may still resolve later.
         console.warn(
-          "SDK context not available within timeout; running in fallback mode."
-        );
+          'SDK context not available within timeout; running in fallback mode.',
+        )
       }
 
-      return { context, isReady };
+      return { context, isReady }
     },
-  });
+  })
 
-  const isReady = farcasterContextQuery.data?.isReady ?? false;
+  const isReady = farcasterContextQuery.data?.isReady ?? false
 
   return (
     <FrameProviderContext.Provider
@@ -95,5 +95,5 @@ export function FrameProvider({ children }: FrameProviderProps) {
     >
       {children}
     </FrameProviderContext.Provider>
-  );
+  )
 }

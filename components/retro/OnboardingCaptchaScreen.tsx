@@ -1,22 +1,26 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/common/Button";
+import { Button } from '@/components/common/Button'
 
-const pixelButtonStyle = { boxShadow: "4px 4px 0px #000" } as const;
+const pixelButtonStyle = { boxShadow: '4px 4px 0px #000' } as const
 
 interface OnboardingCaptchaScreenProps {
-  image?: string;
-  answer: string;
-  isLoading: boolean;
-  onAnswerChange: (value: string) => void;
-  onSolve: () => void;
-  onRefresh: () => void;
+  image?: string
+  answer: string
+  isLoading: boolean
+  isVerifying?: boolean
+  errorMessage?: string | null
+  onAnswerChange: (value: string) => void
+  onSolve: () => void
+  onRefresh: () => void
 }
 
 export function OnboardingCaptchaScreen({
   image,
   answer,
   isLoading,
+  isVerifying = false,
+  errorMessage,
   onAnswerChange,
   onSolve,
   onRefresh,
@@ -30,7 +34,11 @@ export function OnboardingCaptchaScreen({
         </p>
         <div className="rounded-xl border-4 border-border bg-background p-3 shadow-[4px_4px_0px_#000]">
           {image ? (
-            <img src={image} alt="captcha" className="mx-auto w-full rounded-lg" />
+            <img
+              src={image}
+              alt="captcha"
+              className="mx-auto w-full rounded-lg"
+            />
           ) : (
             <div className="h-28 w-full rounded-lg border-2 border-dashed border-border text-[10px] text-secondary flex items-center justify-center">
               LOADING CAPTCHA...
@@ -43,11 +51,19 @@ export function OnboardingCaptchaScreen({
           className="w-full rounded-md border-2 border-border bg-background px-3 py-2 text-xs text-foreground uppercase"
           placeholder="ENTER CODE"
         />
+        {errorMessage ? (
+          <p className="text-[10px] text-secondary">ERROR: {errorMessage}</p>
+        ) : null}
       </div>
 
       <div className="mx-auto w-full max-w-md grid gap-2">
-        <Button className="w-full uppercase" style={pixelButtonStyle} onClick={onSolve} disabled={isLoading}>
-          VERIFY CAPTCHA
+        <Button
+          className="w-full uppercase"
+          style={pixelButtonStyle}
+          onClick={onSolve}
+          disabled={isLoading || isVerifying}
+        >
+          {isVerifying ? 'VERIFYING...' : 'VERIFY CAPTCHA'}
         </Button>
         <Button
           variant="ghost"
@@ -59,5 +75,5 @@ export function OnboardingCaptchaScreen({
         </Button>
       </div>
     </div>
-  );
+  )
 }

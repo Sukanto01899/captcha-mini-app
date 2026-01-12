@@ -1,18 +1,16 @@
-"use client";
+'use client'
 
-import { Sparkles, Zap } from "lucide-react";
+import { Sparkles, Zap } from 'lucide-react'
 
 interface StatsHeaderProps {
-  fid?: number;
-  displayName?: string;
-  pfp?: string;
-  points: number;
-  lives: number;
-  maxLives: number;
-  walletConnected: boolean;
-  walletAddress?: string;
-  isCorrectNetwork: boolean;
-  onSwitchChain?: () => void;
+  fid?: number
+  displayName?: string
+  pfp?: string
+  points: number
+  walletConnected: boolean
+  walletAddress?: string
+  isCorrectNetwork: boolean
+  onSwitchChain?: () => void
 }
 
 export function StatsHeader({
@@ -20,8 +18,6 @@ export function StatsHeader({
   displayName,
   pfp,
   points,
-  lives,
-  maxLives,
   walletConnected,
   walletAddress,
   isCorrectNetwork,
@@ -44,11 +40,13 @@ export function StatsHeader({
           )}
           <div className="min-w-0 space-y-1">
             <p className="text-[10px] text-secondary truncate max-w-[140px]">
-              {displayName || "UNKNOWN"}
+              {displayName || 'UNKNOWN'}
             </p>
-            <p className="text-sm text-primary">{fid ?? "--"}</p>
+            <p className="text-sm text-primary">{fid ?? '--'}</p>
             <p className="text-[10px] text-secondary max-w-[100px] truncate">
-              {walletConnected ? walletAddress || "WALLET CONNECTED" : "WALLET DISCONNECTED"}
+              {walletConnected
+                ? walletAddress || 'WALLET CONNECTED'
+                : 'WALLET DISCONNECTED'}
             </p>
           </div>
         </div>
@@ -58,6 +56,7 @@ export function StatsHeader({
           </div>
           {!isCorrectNetwork && walletConnected && (
             <button
+              type="button"
               className="rounded-md border-2 border-border bg-secondary text-secondary-foreground px-2 py-1 text-[10px] shadow-md hover:shadow-none transition hover:translate-y-1 active:translate-y-2 active:translate-x-1"
               onClick={onSwitchChain}
             >
@@ -67,5 +66,5 @@ export function StatsHeader({
         </div>
       </div>
     </header>
-  );
+  )
 }
