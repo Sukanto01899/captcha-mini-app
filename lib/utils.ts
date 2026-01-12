@@ -1,5 +1,5 @@
-import clsx from 'clsx'
-import { type ClassNameValue, twMerge } from 'tailwind-merge'
+import clsx from "clsx";
+import { type ClassNameValue, twMerge } from "tailwind-merge";
 import {
   APP_ACCOUNT_ASSOCIATION,
   APP_BUTTON_TEXT,
@@ -13,15 +13,15 @@ import {
   APP_TAGS,
   APP_URL,
   APP_WEBHOOK_URL,
-} from './constants'
+} from "./constants";
 
 export function cn(...classes: ClassNameValue[]) {
-  return twMerge(clsx(classes))
+  return twMerge(clsx(classes));
 }
 
 export function getMiniAppEmbedMetadata(ogImageUrl?: string) {
   return {
-    version: 'next',
+    version: "next",
     imageUrl: ogImageUrl,
     imageWidth: 600,
     imageHeight: 400,
@@ -33,7 +33,7 @@ export function getMiniAppEmbedMetadata(ogImageUrl?: string) {
     button: {
       title: APP_BUTTON_TEXT,
       action: {
-        type: 'launch_frame',
+        type: "launch_frame",
         name: APP_NAME,
         url: APP_URL,
         splashImageUrl: APP_SPLASH_URL,
@@ -44,17 +44,17 @@ export function getMiniAppEmbedMetadata(ogImageUrl?: string) {
         tags: APP_TAGS,
       },
     },
-  }
+  };
 }
 export async function getFarcasterDomainManifest() {
   if (!APP_ACCOUNT_ASSOCIATION) {
-    throw new Error('APP_ACCOUNT_ASSOCIATION is not configured.')
+    throw new Error("APP_ACCOUNT_ASSOCIATION is not configured.");
   }
   return {
     accountAssociation: APP_ACCOUNT_ASSOCIATION,
     miniapp: {
-      version: '1',
-      name: APP_NAME ?? 'Retro Captcha Arcade',
+      version: "1",
+      name: APP_NAME ?? "Retro Captcha Arcade",
       homeUrl: APP_URL,
       iconUrl: APP_ICON_URL,
       imageUrl: APP_OG_IMAGE_URL,
@@ -64,19 +64,19 @@ export async function getFarcasterDomainManifest() {
       webhookUrl: APP_WEBHOOK_URL,
       primaryCategory: APP_PRIMARY_CATEGORY,
       tags: APP_TAGS,
-      subtitle: 'Captcha-first onboarding and HumanID minting',
+      subtitle: "HumanID mint",
       description: APP_DESCRIPTION,
-      tagline: 'Retro captcha arcade',
-      ogTitle: 'Retro Captcha Arcade',
-      requiredChains: ['eip155:8453', 'eip155:1'],
+      tagline: "Retro captcha arcade",
+      ogTitle: "Retro Captcha Arcade",
+      requiredChains: ["eip155:8453", "eip155:1"],
       castShareUrl: `${APP_URL}/share`,
     },
     baseBuilder: {
-      ownerAddress: '0xB23955A49c9974a40e68717813a108002072a368',
+      ownerAddress: "0xB23955A49c9974a40e68717813a108002072a368",
     },
-  }
+  };
 }
 export const truncateAddress = (address: string) => {
-  if (!address) return ''
-  return `${address.slice(0, 14)}...${address.slice(-12)}`
-}
+  if (!address) return "";
+  return `${address.slice(0, 14)}...${address.slice(-12)}`;
+};
