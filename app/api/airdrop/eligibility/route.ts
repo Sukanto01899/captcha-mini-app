@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
   const minPoints = Number(minPointsSetting)
   const minScore = Number(minScoreSetting)
-  const score = user.humanScore || 0
+  const score = user?.humanScore || 0
 
   const rpcUrl = process.env.ALCHEMY_RPC_URL || 'https://mainnet.base.org'
   const client = createPublicClient({
