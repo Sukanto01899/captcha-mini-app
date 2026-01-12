@@ -98,7 +98,10 @@ export async function POST(request: NextRequest) {
     const nonce =
       BigInt(Date.now()) * BigInt(1000000) +
       BigInt(Math.floor(Math.random() * 1000000))
-    const amount = POINTS_AMOUNT ? BigInt(POINTS_AMOUNT) : 100n * 10n ** 18n
+    const tokenDecimals = BigInt(10) ** BigInt(18)
+    const amount = POINTS_AMOUNT
+      ? BigInt(POINTS_AMOUNT)
+      : BigInt(100) * tokenDecimals
 
     const signature = await account.signTypedData({
       domain: {

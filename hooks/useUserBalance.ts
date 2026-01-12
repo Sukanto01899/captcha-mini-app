@@ -15,8 +15,9 @@ export function useUserBalance(address?: `0x${string}`) {
     query: { enabled: Boolean(address) },
   })
 
+  const tokenDecimals = BigInt(10) ** BigInt(18)
   const points =
-    typeof data === 'bigint' ? Number(data / 10n ** 18n) : 0
+    typeof data === 'bigint' ? Number(data / tokenDecimals) : 0
 
   return { points, refetch, isLoading }
 }

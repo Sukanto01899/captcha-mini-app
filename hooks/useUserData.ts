@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 type UserState = {
   onboarded: boolean
   humanId: string | null
+  humanIdMinted: boolean
   points: number
   humanScore: number
 }
@@ -10,6 +11,7 @@ type UserState = {
 const defaultUser: UserState = {
   onboarded: false,
   humanId: null,
+  humanIdMinted: false,
   points: 0,
   humanScore: 0,
 }
@@ -30,6 +32,7 @@ export function useUserData(fid?: number) {
       setUser({
         onboarded: Boolean(data.onboarded),
         humanId: data.humanId ?? null,
+        humanIdMinted: Boolean(data.humanIdMinted),
         points: typeof data.points === 'number' ? data.points : 0,
         humanScore: typeof data.humanScore === 'number' ? data.humanScore : 0,
       })

@@ -69,7 +69,10 @@ export function useAirdrop({
         setEligibility({ eligible: false, message: 'CHECK ELIGIBILITY FIRST.' })
         return
       }
-      if (BigInt(dataPayload.burnPoints) > 0n && !dataPayload.pointsToken) {
+      if (
+        BigInt(dataPayload.burnPoints) > BigInt(0) &&
+        !dataPayload.pointsToken
+      ) {
         setEligibility({ eligible: false, message: 'POINTS TOKEN MISSING.' })
         return
       }
@@ -88,7 +91,7 @@ export function useAirdrop({
               BigInt(dataPayload.burnPoints),
               BigInt(dataPayload.humanScore),
               BigInt(dataPayload.deadline),
-              dataPayload.signature,
+              dataPayload.signature as `0x${string}`,
             ],
           })
         } else if (wallet?.sendTransaction) {
@@ -102,7 +105,7 @@ export function useAirdrop({
               BigInt(dataPayload.burnPoints),
               BigInt(dataPayload.humanScore),
               BigInt(dataPayload.deadline),
-              dataPayload.signature,
+              dataPayload.signature as `0x${string}`,
             ],
           })
           await wallet.sendTransaction({
@@ -132,7 +135,7 @@ export function useAirdrop({
         setEligibility({ eligible: false, message: 'CHECK ELIGIBILITY FIRST.' })
         return
       }
-      if (BigInt(dataPayload.burnPoints) <= 0n) {
+      if (BigInt(dataPayload.burnPoints) <= BigInt(0)) {
         return
       }
       setApproveError(null)

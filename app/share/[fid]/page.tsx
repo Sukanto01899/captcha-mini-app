@@ -15,7 +15,7 @@ export async function generateMetadata({
   params: { fid: string }
 }): Promise<Metadata> {
   const { fid } = params
-  const headerList = headers()
+  const headerList = await headers()
   const host = headerList.get('x-forwarded-host') ?? headerList.get('host')
   const proto = headerList.get('x-forwarded-proto') ?? 'https'
   const baseUrl = host ? `${proto}://${host}` : APP_URL
