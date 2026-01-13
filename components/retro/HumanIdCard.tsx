@@ -31,6 +31,16 @@ export function HumanIdCard({
   shareCastConfig,
   onMint,
 }: HumanIdCardProps) {
+  const scoreValue = humanScore ?? 0
+  const scoreTier =
+    scoreValue >= 85
+      ? { label: 'ELITE', tone: 'text-[#00ff41]', bg: 'bg-[#00ff41]/15' }
+      : scoreValue >= 60
+        ? { label: 'TRUSTED', tone: 'text-[#f5d547]', bg: 'bg-[#f5d547]/15' }
+        : scoreValue >= 40
+          ? { label: 'VERIFY', tone: 'text-[#ff9f0a]', bg: 'bg-[#ff9f0a]/15' }
+          : { label: 'RISK', tone: 'text-[#ff004d]', bg: 'bg-[#ff004d]/15' }
+  const scorePercent = Math.max(0, Math.min(100, scoreValue))
   return (
     <div className="space-y-3">
       <div className="relative rounded-xl border-4 border-border bg-card p-4 shadow-[4px_4px_0px_#000]">
@@ -64,7 +74,29 @@ export function HumanIdCard({
                 </div>
               </div>
               <div className="mt-3 rounded-md border-2 border-border bg-background p-3 text-[10px] text-secondary">
-                <p className="text-primary">HUMAN SCORE: {humanScore ?? 0}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-secondary">HUMAN SCORE</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[9px] uppercase ${scoreTier.bg} ${scoreTier.tone}`}
+                  >
+                    {scoreTier.label}
+                  </span>
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-lg font-bold text-primary animate-pulse">
+                    {scoreValue}
+                  </span>
+                  <span className="text-[10px] text-secondary">/ 100</span>
+                </div>
+                <div className="mt-2 h-2 w-full rounded-full border-2 border-border bg-card">
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width] duration-700"
+                    style={{ width: `${scorePercent}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-[9px] text-secondary">
+                  Higher score = better rewards + airdrop access.
+                </p>
               </div>
             </div>
           ) : (

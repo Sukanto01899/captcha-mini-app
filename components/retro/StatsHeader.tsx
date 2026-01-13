@@ -11,6 +11,8 @@ interface StatsHeaderProps {
   walletAddress?: string
   isCorrectNetwork: boolean
   onSwitchChain?: () => void
+  onConnectWallet?: () => void
+  isConnecting?: boolean
 }
 
 export function StatsHeader({
@@ -22,6 +24,8 @@ export function StatsHeader({
   walletAddress,
   isCorrectNetwork,
   onSwitchChain,
+  onConnectWallet,
+  isConnecting = false,
 }: StatsHeaderProps) {
   return (
     <header className="rounded-xl border-4 border-border bg-card p-4 shadow-[4px_4px_0px_#000]">
@@ -54,7 +58,17 @@ export function StatsHeader({
           <div className="rounded-md border-2 border-border bg-background px-2 py-1 text-[10px] text-primary">
             PTS {points}
           </div>
-          {!isCorrectNetwork && walletConnected && (
+          {!walletConnected ? (
+            <button
+              type="button"
+              className="rounded-full border-2 border-border bg-card px-3 py-1 text-[10px] text-primary shadow-[2px_2px_0px_#000]"
+              onClick={onConnectWallet}
+              disabled={isConnecting}
+            >
+              {isConnecting ? 'CONNECTING...' : 'CONNECT WALLET'}
+            </button>
+          ) : null}
+          {!isCorrectNetwork && walletConnected ? (
             <button
               type="button"
               className="rounded-md border-2 border-border bg-secondary text-secondary-foreground px-2 py-1 text-[10px] shadow-md hover:shadow-none transition hover:translate-y-1 active:translate-y-2 active:translate-x-1"
@@ -62,7 +76,7 @@ export function StatsHeader({
             >
               SWITCH TO BASE
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </header>

@@ -22,6 +22,19 @@ export function OnboardingScreen({
         <p className="text-xs text-secondary">
           SOLVE THE CAPTCHA TO MINT HUMAN ID
         </p>
+        <div className="rounded-xl border-4 border-border bg-background p-4 text-left text-[10px] text-secondary shadow-[4px_4px_0px_#000]">
+          <p className="mb-2 text-primary">QUICK GUIDE</p>
+          <ul className="space-y-1">
+            <li>- VERIFY CAPTCHA</li>
+            <li>- SCAN YOUR PROFILE SCORE</li>
+            <li>- MINT HUMAN ID ON BASE</li>
+          </ul>
+          <p className="mt-3 text-primary">EARN & AIRDROP</p>
+          <ul className="mt-1 space-y-1">
+            <li>- SOLVE CAPTCHAS → EARN PTS</li>
+            <li>- USE PTS TO JOIN AIRDROPS</li>
+          </ul>
+        </div>
         {isLoading ? (
           <p className="text-[10px] text-secondary">FETCHING HUMAN SCORE...</p>
         ) : null}

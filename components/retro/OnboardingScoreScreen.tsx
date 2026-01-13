@@ -17,15 +17,39 @@ export function OnboardingScoreScreen() {
             <div className="h-3 rounded-sm bg-secondary/40" />
           </div>
           <motion.div
-            className="absolute left-0 right-0 h-6 bg-primary/20"
-            initial={{ y: -10 }}
-            animate={{ y: 120 }}
+            className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(0,255,65,0.18),transparent)]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0.2, 0.6, 0.2] }}
+            transition={{
+              duration: 1.2,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: 'easeInOut',
+            }}
+          />
+          <motion.div
+            className="absolute left-0 right-0 h-8 bg-[linear-gradient(90deg,transparent,rgba(0,255,65,0.45),transparent)] blur-[1px]"
+            initial={{ y: -16 }}
+            animate={{ y: 140 }}
             transition={{
               duration: 1.6,
               repeat: Number.POSITIVE_INFINITY,
               ease: 'linear',
             }}
           />
+        </div>
+        <div className="flex items-center justify-center gap-2 text-[10px] text-secondary">
+          <span className="uppercase">Scanning...</span>
+          <motion.span
+            className="inline-block"
+            animate={{ opacity: [0.2, 1, 0.2] }}
+            transition={{
+              duration: 0.8,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: 'easeInOut',
+            }}
+          >
+            Signal locked
+          </motion.span>
         </div>
         <div className="flex justify-center">
           <div className="flex items-center gap-2 rounded-full border-2 border-border bg-background px-4 py-2 text-[10px] text-secondary shadow-[3px_3px_0px_#000]">

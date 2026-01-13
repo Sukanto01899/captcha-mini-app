@@ -9,6 +9,7 @@ import {
   ProfileTab,
 } from "@/components/tabs";
 import { OnboardingFlow } from "@/components/ui/OnboardingFlow";
+import { LoadingPage } from "@/components/ui/LoadingPage";
 import airdropClaimContractAbi from "@/contracts/abi/AirdropClaim.json";
 import humanIdAbi from "@/contracts/abi/HumanId.json";
 import pointsClaimAbi from "@/contracts/abi/PointsClaim.json";
@@ -58,6 +59,9 @@ export function App() {
   const [claimError, setClaimError] = useState<string | null>(null);
   const [nowTick, setNowTick] = useState(() => Date.now());
   const [isAddingMiniApp, setIsAddingMiniApp] = useState(false);
+  const [isMiniAppAdded, setIsMiniAppAdded] = useState(() =>
+    Boolean(context?.client?.added)
+  );
   const [onboardingStep, setOnboardingStep] = useState<
     "intro" | "captcha" | "scoring" | "mint"
   >("intro");
@@ -177,9 +181,7 @@ export function App() {
   }, [fid, setOnboarded, updateUser]);
 
   const buildHumanId = useCallback((fidValue: number) => {
-    const seconds = Math.floor(Date.now() / 1000).toString();
-    const tail = seconds.slice(-4);
-    return `HUM-${fidValue.toString().padStart(4, "0")}-${tail}`;
+    return `HUM-${fidValue}`;
   }, []);
 
   const handleMint = useCallback(async () => {
@@ -243,6 +245,7 @@ export function App() {
     setIsAddingMiniApp(true);
     try {
       await actions.addMiniApp();
+      setIsMiniAppAdded(true);
     } catch (error) {
       console.error("add miniapp failed", error);
     } finally {
@@ -316,11 +319,12 @@ export function App() {
   const burnPointsAmount = claimPayload?.burnPoints
     ? BigInt(claimPayload.burnPoints)
     : BigInt(0);
-  const { data: pointsAllowance } = useReadContract({
-    address: claimPayload?.pointsToken as `0x${string}` | undefined,
-    abi: [
-      {
-        name: "allowance",
+  const { data: pointsAllowance, refetch: refetchPointsAllowance } =
+    useReadContract({
+      address: claimPayload?.pointsToken as `0x${string}` | undefined,
+      abi: [
+        {
+          name: "allowance",
         type: "function",
         stateMutability: "view",
         inputs: [
@@ -421,6 +425,12 @@ export function App() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (context?.client?.added) {
+      setIsMiniAppAdded(true);
+    }
+  }, [context?.client?.added]);
+
   const tabs: { key: TabKey; label: string }[] = [
     { key: "captcha", label: "CAPTCHA" },
     { key: "airdrop", label: "AIRDROP" },
@@ -449,7 +459,11 @@ export function App() {
     [captchaError, setCaptchaError, setAnswer]
   );
 
-  if (onboardingChecked && isOnboarding) {
+  if (!onboardingChecked) {
+    return <LoadingPage />;
+  }
+
+  if (isOnboarding) {
     return (
       <OnboardingFlow
         onboardingChecked={onboardingChecked}
@@ -511,6 +525,13 @@ export function App() {
               walletConnected={isConnected && Boolean(isEthProviderAvailable)}
               walletAddress={address ? truncateAddress(address) : undefined}
               isCorrectNetwork={isCorrectNetwork}
+              onConnectWallet={() => {
+                const connector = connectors[0]
+                if (connector) {
+                  connect({ connector })
+                }
+              }}
+              isConnecting={isConnecting}
               onSwitchChain={
                 switchChain
                   ? () =>
@@ -581,12 +602,13 @@ export function App() {
                 eligibilityMessage={
                   approveError || airdropClaimError || eligibility.message
                 }
-                isMiniAppAdded={context?.client?.added ?? true}
+                isMiniAppAdded={isMiniAppAdded}
                 isAddingMiniApp={isAddingMiniApp}
                 onAddMiniApp={handleAddMiniApp}
                 onCheckEligibility={checkEligibility}
                 onApprove={async () => {
                   await approve();
+                  await refetchPointsAllowance();
                 }}
                 onClaim={async () => {
                   await claim();

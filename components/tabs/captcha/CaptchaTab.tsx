@@ -1,26 +1,26 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/common/Button'
-import { Clock } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { Button } from "@/components/common/Button";
+import { Clock } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-const pixelButtonStyle = { boxShadow: '4px 4px 0px #000' } as const
+const pixelButtonStyle = { boxShadow: "4px 4px 0px #000" } as const;
 
 interface CaptchaTabProps {
-  challengeImage?: string
-  answer: string
-  isLoading: boolean
-  isVerifying?: boolean
-  errorMessage?: string | null
-  claimReady?: boolean
-  claimError?: string | null
-  isClaiming?: boolean
-  cooldownSeconds: number
-  onAnswerChange: (value: string) => void
-  onVerify: () => void
-  onRefresh: () => void
-  onClaim?: () => void
-  onGoAirdrop?: () => void
+  challengeImage?: string;
+  answer: string;
+  isLoading: boolean;
+  isVerifying?: boolean;
+  errorMessage?: string | null;
+  claimReady?: boolean;
+  claimError?: string | null;
+  isClaiming?: boolean;
+  cooldownSeconds: number;
+  onAnswerChange: (value: string) => void;
+  onVerify: () => void;
+  onRefresh: () => void;
+  onClaim?: () => void;
+  onGoAirdrop?: () => void;
 }
 
 export function CaptchaTab({
@@ -39,42 +39,42 @@ export function CaptchaTab({
   onClaim,
   onGoAirdrop,
 }: CaptchaTabProps) {
-  const [remainingSeconds, setRemainingSeconds] = useState(cooldownSeconds)
-  const isCoolingDown = remainingSeconds > 0
+  const [remainingSeconds, setRemainingSeconds] = useState(cooldownSeconds);
+  const isCoolingDown = remainingSeconds > 0;
 
   useEffect(() => {
-    setRemainingSeconds(cooldownSeconds)
-  }, [cooldownSeconds])
+    setRemainingSeconds(cooldownSeconds);
+  }, [cooldownSeconds]);
 
   useEffect(() => {
-    if (!isCoolingDown) return
+    if (!isCoolingDown) return;
     const interval = setInterval(() => {
-      setRemainingSeconds((prev) => Math.max(0, prev - 1))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [isCoolingDown])
+      setRemainingSeconds((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isCoolingDown]);
 
   const formattedCountdown = useMemo(() => {
-    const total = Math.max(0, remainingSeconds)
-    const hours = Math.floor(total / 3600)
-    const minutes = Math.floor((total % 3600) / 60)
-    const seconds = total % 60
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds
+    const total = Math.max(0, remainingSeconds);
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const seconds = total % 60;
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
       .toString()
-      .padStart(2, '0')}`
-  }, [remainingSeconds])
+      .padStart(2, "0")}`;
+  }, [remainingSeconds]);
 
   if (isCoolingDown) {
     return (
       <section className="space-y-4">
         <div className="rounded-xl border-4 border-border bg-card p-4 shadow-[4px_4px_0px_#000]">
-          <p className="text-xs text-secondary">CAPTCHA COOLDOWN</p>
+          <p className="text-xs text-secondary text-center">NEXT CAPTCHA</p>
           <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-xl border-4 border-border bg-background p-6 shadow-[4px_4px_0px_#000]">
             <Clock className="h-8 w-8 text-primary" />
             <p className="text-2xl font-black text-primary">
               {formattedCountdown}
             </p>
-            <p className="text-[10px] text-secondary">
+            <p className="text-[10px] text-secondary text-center">
               COME BACK FOR THE NEXT CHALLENGE
             </p>
           </div>
@@ -87,7 +87,7 @@ export function CaptchaTab({
           </Button>
         </div>
       </section>
-    )
+    );
   }
 
   if (claimReady) {
@@ -112,11 +112,11 @@ export function CaptchaTab({
             onClick={onClaim}
             disabled={isClaiming}
           >
-            {isClaiming ? 'CLAIMING...' : 'CLAIM PTS NOW'}
+            {isClaiming ? "CLAIMING..." : "CLAIM PTS NOW"}
           </Button>
         </div>
       </section>
-    )
+    );
   }
 
   return (
@@ -134,8 +134,13 @@ export function CaptchaTab({
               className="mx-auto w-full rounded-lg"
             />
           ) : (
-            <div className="flex h-28 w-full items-center justify-center rounded-lg border-2 border-dashed border-border text-[10px] text-secondary">
-              LOADING CAPTCHA...
+            <div className="relative overflow-hidden rounded-lg border-2 border-dashed border-border bg-card">
+              <div className="flex h-28 w-full flex-col items-center justify-center gap-2 text-[10px] text-secondary">
+                <div className="h-3 w-3 animate-pulse rounded-full bg-primary" />
+                <span>GENERATING CAPTCHA...</span>
+              </div>
+              <div className="absolute inset-0 animate-pulse bg-[linear-gradient(90deg,transparent,rgba(0,255,65,0.15),transparent)]" />
+              <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.35)_0px,rgba(0,0,0,0.35)_1px,transparent_1px,transparent_3px)] opacity-50" />
             </div>
           )}
         </div>
@@ -160,7 +165,7 @@ export function CaptchaTab({
             onClick={onVerify}
             disabled={isLoading || isVerifying || isCoolingDown}
           >
-            {isVerifying ? 'VERIFYING...' : 'VERIFY'}
+            {isVerifying ? "VERIFYING..." : "VERIFY"}
           </Button>
           <Button
             variant="ghost"
@@ -171,7 +176,10 @@ export function CaptchaTab({
             REFRESH
           </Button>
         </div>
+        <p className="mt-3 text-[9px] text-secondary text-center">
+          SOLVE CAPTCHA → VERIFY → CLAIM 100 PTS. COOLDOWN APPLIES.
+        </p>
       </div>
     </section>
-  )
+  );
 }
