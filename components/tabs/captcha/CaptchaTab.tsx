@@ -176,8 +176,8 @@ export function CaptchaTab({
             REFRESH
           </Button>
         </div>
-        <p className="mt-3 text-[9px] text-secondary text-center">
-          SOLVE CAPTCHA → VERIFY → CLAIM 100 PTS. COOLDOWN APPLIES.
+        <p className="mt-3 text-[9px] text-primary text-center">
+          SOLVE CAPTCHA → VERIFY → CLAIM 100 PTS.
         </p>
       </div>
     </section>

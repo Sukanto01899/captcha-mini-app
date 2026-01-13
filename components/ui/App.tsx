@@ -123,7 +123,7 @@ export function App() {
   } = useUserData(fid);
 
   const isOnboarding = !user.onboarded;
-  const minted = Boolean(user.humanId);
+  const minted = Boolean(user.humanIdMinted || user.humanId);
   const mintedHumanId = user.humanId;
 
   const { scoreLoading, scoreError, refreshScore } = useHumanScore(
@@ -215,6 +215,16 @@ export function App() {
       setHumanId(humanId);
       setOnboarded(true);
       await updateUser({ onboarded: true, humanId, humanIdMinted: true });
+      if (actions?.composeCast) {
+        try {
+          await actions.composeCast({
+            text: `I minted my Human ID. My Human Score: ${user.humanScore}.\n\n Check your score and mint your Human ID.`,
+            embeds: [`${APP_URL}/share/${fid}`],
+          });
+        } catch (error) {
+          console.error("compose cast failed", error);
+        }
+      }
       setIsMinting(false);
       setScoreUpdated(false);
       setTab("captcha");
@@ -325,22 +335,22 @@ export function App() {
       abi: [
         {
           name: "allowance",
-        type: "function",
-        stateMutability: "view",
-        inputs: [
-          { name: "owner", type: "address" },
-          { name: "spender", type: "address" },
-        ],
-        outputs: [{ type: "uint256" }],
-      },
-    ],
-    functionName: "allowance",
-    args:
-      address && claimPayload?.contract
-        ? [address, claimPayload.contract as `0x${string}`]
-        : undefined,
-    query: { enabled: Boolean(address && claimPayload?.contract) },
-  });
+          type: "function",
+          stateMutability: "view",
+          inputs: [
+            { name: "owner", type: "address" },
+            { name: "spender", type: "address" },
+          ],
+          outputs: [{ type: "uint256" }],
+        },
+      ],
+      functionName: "allowance",
+      args:
+        address && claimPayload?.contract
+          ? [address, claimPayload.contract as `0x${string}`]
+          : undefined,
+      query: { enabled: Boolean(address && claimPayload?.contract) },
+    });
   const needsApproval =
     burnPointsAmount > BigInt(0) &&
     (typeof pointsAllowance === "bigint" ? pointsAllowance : BigInt(0)) <
@@ -432,7 +442,7 @@ export function App() {
   }, [context?.client?.added]);
 
   const tabs: { key: TabKey; label: string }[] = [
-    { key: "captcha", label: "CAPTCHA" },
+    { key: "captcha", label: "EARN PTS" },
     { key: "airdrop", label: "AIRDROP" },
     { key: "profile", label: "PROFILE" },
   ];
@@ -526,9 +536,9 @@ export function App() {
               walletAddress={address ? truncateAddress(address) : undefined}
               isCorrectNetwork={isCorrectNetwork}
               onConnectWallet={() => {
-                const connector = connectors[0]
+                const connector = connectors[0];
                 if (connector) {
-                  connect({ connector })
+                  connect({ connector });
                 }
               }}
               isConnecting={isConnecting}
@@ -613,6 +623,16 @@ export function App() {
                 onClaim={async () => {
                   await claim();
                   await refetchAirdropClaimed();
+                  if (actions?.composeCast && fid) {
+                    try {
+                      await actions.composeCast({
+                        text: "Airdrop claimed on Captcha. Check your eligibility and claim yours.",
+                        embeds: [`${APP_URL}/share/${fid}`],
+                      });
+                    } catch (error) {
+                      console.error("compose cast failed", error);
+                    }
+                  }
                 }}
               />
             ) : null}
