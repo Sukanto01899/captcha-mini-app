@@ -21,6 +21,7 @@ import { useHumanScore } from "@/hooks/useHumanScore";
 import { useUserBalance } from "@/hooks/useUserBalance";
 import { useUserData } from "@/hooks/useUserData";
 import { APP_URL } from "@/lib/constants";
+import { notificationsBtn } from "@/lib/constants";
 import { truncateAddress } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -61,6 +62,10 @@ export function App() {
   const [isAddingMiniApp, setIsAddingMiniApp] = useState(false);
   const [isMiniAppAdded, setIsMiniAppAdded] = useState(() =>
     Boolean(context?.client?.added)
+  );
+  const [isSendingNotification, setIsSendingNotification] = useState(false);
+  const [notificationStatus, setNotificationStatus] = useState<string | null>(
+    null
   );
   const [onboardingStep, setOnboardingStep] = useState<
     "intro" | "captcha" | "scoring" | "mint"
@@ -128,6 +133,7 @@ export function App() {
 
   const { scoreLoading, scoreError, refreshScore } = useHumanScore(
     fid,
+    address,
     (score) => {
       setHumanScore(score);
       setScoreUpdated(true);
@@ -325,6 +331,44 @@ export function App() {
     refetchLastClaimAt,
     writeContractAsync,
   ]);
+
+  const handleSendNotification = useCallback(
+    async (notification: {
+      id: number;
+      name: string;
+      title: string;
+      body: string;
+    }) => {
+      if (!isAdmin) return;
+      setIsSendingNotification(true);
+      setNotificationStatus(null);
+      try {
+        const res = await authFetch("/api/send-notification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: notification.title,
+            body: notification.body,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.success) {
+          const message = data?.errors
+            ? "NOTIFICATION FAILED."
+            : "SEND FAILED.";
+          setNotificationStatus(message);
+          return;
+        }
+        setNotificationStatus("NOTIFICATION SENT.");
+      } catch (error) {
+        console.error("send notification failed", error);
+        setNotificationStatus("NOTIFICATION ERROR.");
+      } finally {
+        setIsSendingNotification(false);
+      }
+    },
+    [authFetch, isAdmin]
+  );
 
   const burnPointsAmount = claimPayload?.burnPoints
     ? BigInt(claimPayload.burnPoints)
@@ -652,9 +696,13 @@ export function App() {
                   draft?.requireHumanId ?? airdropConfig.requireHumanId
                 }
                 paused={draft?.paused ?? airdropConfig.paused}
+                notifications={notificationsBtn}
                 onUpdateConfig={updateDraft}
                 onSave={saveConfig}
+                onSendNotification={handleSendNotification}
                 isSaving={saveState.isSaving}
+                isSendingNotification={isSendingNotification}
+                notificationStatus={notificationStatus}
                 errorMessage={saveState.error}
                 successMessage={saveState.success ? "UPDATED" : null}
               />

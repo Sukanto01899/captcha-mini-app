@@ -33,32 +33,20 @@ export const APP_ACCOUNT_ASSOCIATION = {
 export const notificationsBtn = [
   {
     id: 1,
-    name: "Score Check",
-    title: "Check your security score today.",
-    body: "Open Retro Captcha Arcade and clear a challenge for rewards.",
+    name: "Check-in Points",
+    title: "Daily check-in points",
+    body: "Open Captcha, clear a challenge, and claim your check-in points.",
   },
   {
     id: 2,
-    name: "Daily Cast",
-    title: "Daily captcha drop",
-    body: "Clear a fresh captcha and mint a new HumanID badge.",
+    name: "New Airdrop",
+    title: "New airdrop launched",
+    body: "A fresh airdrop is live. Check eligibility and claim on Captcha.",
   },
   {
     id: 3,
-    name: "Increase score?",
-    title: "Boost your streak",
-    body: "Keep your streak alive and climb the level ladder.",
-  },
-  {
-    id: 4,
-    name: "Rewards",
-    title: "Claim meme tokens",
-    body: "Captcha complete = fresh $CAP on Base for you.",
-  },
-  {
-    id: 5,
-    name: "Rewards",
-    title: "Mint a badge",
-    body: "Mint another HumanID card and share it anywhere.",
+    name: "Score Update",
+    title: "Score update ready",
+    body: "Your Human Score may have changed. Open Captcha to refresh it.",
   },
 ];

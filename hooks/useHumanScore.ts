@@ -1,6 +1,10 @@
 import { useCallback, useState } from 'react'
 
-export function useHumanScore(fid?: number, onScore?: (score: number) => void) {
+export function useHumanScore(
+  fid?: number,
+  walletAddress?: string,
+  onScore?: (score: number) => void,
+) {
   const [scoreLoading, setScoreLoading] = useState(false)
   const [scoreError, setScoreError] = useState<string | null>(null)
 
@@ -15,7 +19,7 @@ export function useHumanScore(fid?: number, onScore?: (score: number) => void) {
       const res = await fetch('/api/user/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fid }),
+      body: JSON.stringify({ fid, walletAddress }),
       })
       if (!res.ok) {
         throw new Error('Failed to load score')
@@ -31,7 +35,7 @@ export function useHumanScore(fid?: number, onScore?: (score: number) => void) {
       setScoreLoading(false)
       return false
     }
-  }, [fid, onScore])
+  }, [fid, onScore, walletAddress])
 
   return { scoreLoading, scoreError, refreshScore, setScoreError }
 }

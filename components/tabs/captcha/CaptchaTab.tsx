@@ -123,9 +123,7 @@ export function CaptchaTab({
     <section className="space-y-4">
       <div className="rounded-xl border-4 border-border bg-card p-4 shadow-[4px_4px_0px_#000]">
         <p className="text-xs text-secondary">CAPTCHA CHALLENGE</p>
-        <p className="mt-2 text-[10px] text-primary">
-          SECURE UNIQUE CAPTCHA. TYPE THE CODE TO VERIFY.
-        </p>
+
         <div className="mt-3 rounded-xl border-4 border-border bg-background p-3 shadow-[4px_4px_0px_#000]">
           {challengeImage ? (
             <img
@@ -155,9 +153,7 @@ export function CaptchaTab({
             ERROR: {errorMessage}
           </p>
         ) : null}
-        <div className="mt-2 flex items-center justify-end text-[10px] text-secondary">
-          <span>READY</span>
-        </div>
+        <div className="mt-2 flex items-center justify-end text-[10px] text-secondary"></div>
         <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
           <Button
             className="w-full uppercase"

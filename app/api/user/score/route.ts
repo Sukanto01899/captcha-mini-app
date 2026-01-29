@@ -2,8 +2,12 @@ import dbConnect from '@/lib/db'
 import { getNeynarUser } from '@/lib/neynar'
 import { UserModel } from '@/models/User'
 import { type NextRequest, NextResponse } from 'next/server'
+import { createPublicClient, http } from 'viem'
+import { base } from 'viem/chains'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+const MONTH_DAYS = 30
+const MAX_CATEGORY_SCORE = 10
 
 type NeynarUser = {
   follower_count?: number
@@ -13,17 +17,34 @@ type NeynarUser = {
   casts?: number
   likes_count?: number
   likes?: number
+  comment_count?: number
+  comments_count?: number
+  replies_count?: number
   neynar_score?: number
   score?: number
-  spam?: boolean
+  spam?: boolean | number | string
+  spam_label?: number | string
   pfp_url?: string
   bio?: string
-  verified_addresses?: string[] | null
+  verified_addresses?:
+    | {
+        eth_addresses?: string[]
+        sol_addresses?: string[]
+        primary?: {
+          eth_address?: string
+          sol_address?: string
+        }
+      }
+    | string[]
+    | null
   verifications?: string[] | null
   verified_email?: boolean
   power_badge?: boolean
   registered_at?: string | number | Date
   created_at?: string | number | Date
+  experimental?: {
+    neynar_user_score?: number
+  }
 }
 
 function toNumber(value: unknown) {
@@ -36,43 +57,43 @@ function computeHumanScore(details: {
   following: number
   casts: number
   likes: number
+  comments: number
   accountAgeDays: number
   neynarScore: number
-  isSpam: boolean
-  hasProfile: boolean
-  hasVerifiedAddress: boolean
-  hasVerifiedEmail: boolean
+  walletBalanceEth: number
+  spamLabel: number
   hasPowerBadge: boolean
 }) {
-  const followerScore = Math.min(details.followers, 10000) / 200
-  const followingScore = Math.min(details.following, 5000) / 400
-  const castScore = Math.min(details.casts, 2000) / 20
-  const likeScore = Math.min(details.likes, 2000) / 40
-  const ageScore = Math.min(details.accountAgeDays, 365) / 5
-  const neynarScore = details.neynarScore > 0 ? details.neynarScore * 20 : 0
-  const profileScore = details.hasProfile ? 5 : 0
-  const walletScore = details.hasVerifiedAddress ? 10 : 0
-  const emailScore = details.hasVerifiedEmail ? 5 : 0
-  const powerBadgeScore = details.hasPowerBadge ? 10 : 0
+  const clampScore = (value: number) =>
+    Math.max(0, Math.min(MAX_CATEGORY_SCORE, value))
+  const scoreFromUnit = (value: number, unit: number) =>
+    unit > 0 ? clampScore(value / unit) : 0
 
-  let score =
-    20 +
+  const followerScore = scoreFromUnit(details.followers, 100)
+  const followingScore = scoreFromUnit(details.following, 100)
+  const neynarScore = scoreFromUnit(details.neynarScore, 0.1)
+  const castScore = scoreFromUnit(details.casts, 10)
+  const likeScore = scoreFromUnit(details.likes, 100)
+  const commentScore = scoreFromUnit(details.comments, 10)
+  const ageScore = scoreFromUnit(details.accountAgeDays, MONTH_DAYS)
+  const walletScore = scoreFromUnit(details.walletBalanceEth, 0.0005)
+  const premiumBadgeScore = details.hasPowerBadge ? 10 : 0
+  const spamScore =
+    details.spamLabel === 0 ? 10 : details.spamLabel === 1 ? 5 : 0
+
+  const total =
     followerScore +
     followingScore +
+    neynarScore +
     castScore +
     likeScore +
+    commentScore +
+    premiumBadgeScore +
     ageScore +
-    neynarScore +
-    profileScore +
     walletScore +
-    emailScore +
-    powerBadgeScore
+    spamScore
 
-  if (details.isSpam) {
-    score = Math.min(score, 15)
-  }
-
-  return Math.max(0, Math.min(100, Math.round(score)))
+  return Math.max(0, Math.min(100, Math.round(total)))
 }
 
 function parseAccountAgeDays(rawDate?: string | number | Date | null) {
@@ -82,8 +103,55 @@ function parseAccountAgeDays(rawDate?: string | number | Date | null) {
   return Math.max(0, Math.floor((Date.now() - date.getTime()) / DAY_MS))
 }
 
+function resolveSpamLabel(rawValue: unknown) {
+  if (typeof rawValue === 'number') return rawValue
+  if (typeof rawValue === 'string') {
+    const parsed = Number(rawValue)
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+  if (rawValue === true) return 2
+  if (rawValue === false) return 0
+  return 0
+}
+
+function resolveVerifiedEthAddresses(
+  verifiedAddresses: NeynarUser['verified_addresses'],
+  verifications: NeynarUser['verifications'],
+) {
+  if (Array.isArray(verifiedAddresses)) return verifiedAddresses
+  if (verifiedAddresses?.eth_addresses?.length)
+    return verifiedAddresses.eth_addresses
+  if (verifiedAddresses?.primary?.eth_address)
+    return [verifiedAddresses.primary.eth_address]
+  if (Array.isArray(verifications)) return verifications
+  return []
+}
+
+async function getWalletBalanceEth(address?: string | null) {
+  if (!address) return 0
+  const rpcUrl = process.env.ALCHEMY_RPC_URL || 'https://mainnet.base.org'
+  const client = createPublicClient({
+    chain: base,
+    transport: http(rpcUrl),
+  })
+
+  try {
+    const balanceWei = await client.getBalance({
+      address: address as `0x${string}`,
+    })
+    const balanceEth = Number(balanceWei) / 1e18
+    return Number.isFinite(balanceEth) ? balanceEth : 0
+  } catch (error) {
+    console.error('Failed to fetch wallet balance', error)
+    return 0
+  }
+}
+
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as { fid?: number }
+  const body = (await request.json()) as {
+    fid?: number
+    walletAddress?: string | null
+  }
   if (!body.fid) {
     return NextResponse.json({ error: 'Missing fid' }, { status: 400 })
   }
@@ -102,34 +170,38 @@ export async function POST(request: NextRequest) {
   const following = toNumber(neynarUser?.following_count)
   const casts = toNumber(neynarUser?.casts_count ?? neynarUser?.casts)
   const likes = toNumber(neynarUser?.likes_count ?? neynarUser?.likes)
-  const neynarScore = toNumber(neynarUser?.neynar_score ?? neynarUser?.score)
-  const isSpam = Boolean(neynarUser?.spam)
-  const hasProfile = Boolean(neynarUser?.pfp_url || neynarUser?.bio)
-  const verifiedAddresses =
-    neynarUser?.verified_addresses || neynarUser?.verifications || []
-  const hasVerifiedAddress = Array.isArray(verifiedAddresses)
-    ? verifiedAddresses.length > 0
-    : Boolean(verifiedAddresses)
-  const hasVerifiedEmail = Boolean(neynarUser?.verified_email)
+  const comments = toNumber(
+    neynarUser?.comment_count ??
+      neynarUser?.comments_count ??
+      neynarUser?.replies_count,
+  )
+  const neynarScore = toNumber(
+    neynarUser?.neynar_score ??
+      neynarUser?.experimental?.neynar_user_score ??
+      neynarUser?.score,
+  )
+  const spamLabel = resolveSpamLabel(
+    neynarUser?.spam_label ?? neynarUser?.spam,
+  )
   const hasPowerBadge = Boolean(neynarUser?.power_badge)
   const accountAgeDays = parseAccountAgeDays(
     neynarUser?.registered_at ?? neynarUser?.created_at,
   )
+  const walletBalanceEth = await getWalletBalanceEth(body.walletAddress)
 
   const humanDetails = {
     followers,
     following,
     casts,
     likes,
+    comments,
     accountAgeDays,
     neynarScore,
+    walletBalanceEth,
+    spamLabel,
   }
   const humanScore = computeHumanScore({
     ...humanDetails,
-    isSpam,
-    hasProfile,
-    hasVerifiedAddress,
-    hasVerifiedEmail,
     hasPowerBadge,
   })
 

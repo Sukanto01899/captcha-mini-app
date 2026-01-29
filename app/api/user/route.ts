@@ -55,8 +55,11 @@ export async function POST(request: NextRequest) {
       following: number
       casts: number
       likes: number
+      comments: number
       accountAgeDays: number
       neynarScore: number
+      walletBalanceEth: number
+      spamLabel: number
     }
     points?: number
   }

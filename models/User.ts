@@ -11,8 +11,11 @@ export interface IUser extends Document {
     following: number
     casts: number
     likes: number
+    comments: number
     accountAgeDays: number
     neynarScore: number
+    walletBalanceEth: number
+    spamLabel: number
   }
   points: number
   createdAt?: Date
@@ -31,8 +34,11 @@ const UserSchema = new Schema<IUser>(
       following: { type: Number, default: 0 },
       casts: { type: Number, default: 0 },
       likes: { type: Number, default: 0 },
+      comments: { type: Number, default: 0 },
       accountAgeDays: { type: Number, default: 0 },
       neynarScore: { type: Number, default: 0 },
+      walletBalanceEth: { type: Number, default: 0 },
+      spamLabel: { type: Number, default: 0 },
     },
     points: { type: Number, default: 0 },
   },

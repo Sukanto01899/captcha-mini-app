@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 export function LoadingPage() {
   return (
@@ -10,7 +10,7 @@ export function LoadingPage() {
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#00ff41] border-t-transparent" />
         </div>
         <p className="text-lg font-semibold tracking-wide text-primary">
-          BOOTING ARCADE CORE
+          BOOTING CORE
         </p>
         <p className="mt-2 text-[11px] text-secondary">
           INITIALIZING HUMAN-ONLY CAPTCHA SYSTEM.
@@ -25,7 +25,7 @@ export function LoadingPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default LoadingPage
+export default LoadingPage;

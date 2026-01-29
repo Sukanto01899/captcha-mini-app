@@ -9,6 +9,12 @@ interface AdminTabProps {
   maxClaimsPerUser: number
   requireHumanId: boolean
   paused: boolean
+  notifications: Array<{
+    id: number
+    name: string
+    title: string
+    body: string
+  }>
   onUpdateConfig: (
     update: Partial<{
       poolAmount: string
@@ -21,7 +27,15 @@ interface AdminTabProps {
     }>,
   ) => void
   onSave: () => void
+  onSendNotification: (notification: {
+    id: number
+    name: string
+    title: string
+    body: string
+  }) => void
   isSaving?: boolean
+  isSendingNotification?: boolean
+  notificationStatus?: string | null
   errorMessage?: string | null
   successMessage?: string | null
 }
@@ -35,9 +49,13 @@ export function AdminTab({
   maxClaimsPerUser,
   requireHumanId,
   paused,
+  notifications,
   onUpdateConfig,
   onSave,
+  onSendNotification,
   isSaving = false,
+  isSendingNotification = false,
+  notificationStatus,
   errorMessage,
   successMessage,
 }: AdminTabProps) {
@@ -136,6 +154,26 @@ export function AdminTab({
         ) : null}
         {successMessage ? (
           <p className="text-[10px] text-secondary">STATUS: {successMessage}</p>
+        ) : null}
+      </div>
+
+      <div className="mt-4 grid gap-2 text-[10px]">
+        <div className="rounded-md border-2 border-border bg-background px-3 py-2 text-secondary">
+          NOTIFICATIONS
+        </div>
+        {notifications.map((notification) => (
+          <button
+            key={notification.id}
+            type="button"
+            className="w-full rounded-md border-2 border-border bg-card px-3 py-2 text-[10px] text-primary shadow-[4px_4px_0px_#000]"
+            onClick={() => onSendNotification(notification)}
+            disabled={isSendingNotification}
+          >
+            {isSendingNotification ? 'SENDING...' : notification.name}
+          </button>
+        ))}
+        {notificationStatus ? (
+          <p className="text-[10px] text-secondary">{notificationStatus}</p>
         ) : null}
       </div>
     </div>
