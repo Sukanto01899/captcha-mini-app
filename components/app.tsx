@@ -1,19 +1,26 @@
-'use client'
+"use client";
 
-import { useFrame } from '@/app/providers/farcaster-provider'
-import { SafeAreaContainer } from '@/app/providers/safe-area-container'
-import { App, LoadingPage } from '@/components/ui'
-import { Toaster } from 'react-hot-toast'
+import { useFrame } from "@/app/providers/farcaster-provider";
+import { SafeAreaContainer } from "@/app/providers/safe-area-container";
+import { App, LoadingPage } from "@/components/ui";
+import { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 
 export default function Home() {
-  const { context, isLoading, isSDKLoaded } = useFrame()
+  const { context, isLoading, isSDKLoaded, actions } = useFrame();
+
+  useEffect(() => {
+    if (actions) {
+      actions?.addMiniApp();
+    }
+  }, [actions]);
 
   if (isLoading) {
     return (
       <SafeAreaContainer insets={context?.client.safeAreaInsets}>
         <LoadingPage />
       </SafeAreaContainer>
-    )
+    );
   }
 
   if (!isSDKLoaded) {
@@ -25,7 +32,7 @@ export default function Home() {
           </h1>
         </div>
       </SafeAreaContainer>
-    )
+    );
   }
 
   return (
@@ -35,5 +42,5 @@ export default function Home() {
         <Toaster position="top-center" />
       </div>
     </SafeAreaContainer>
-  )
+  );
 }

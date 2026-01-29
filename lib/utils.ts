@@ -54,7 +54,7 @@ export async function getFarcasterDomainManifest() {
     accountAssociation: APP_ACCOUNT_ASSOCIATION,
     miniapp: {
       version: "1",
-      name: APP_NAME ?? "Retro Captcha Arcade",
+      name: APP_NAME ?? "Captcha",
       homeUrl: APP_URL,
       iconUrl: APP_ICON_URL,
       imageUrl: APP_OG_IMAGE_URL,
@@ -68,7 +68,7 @@ export async function getFarcasterDomainManifest() {
       description: APP_DESCRIPTION,
       tagline: "Retro captcha arcade",
       ogTitle: "Retro Captcha Arcade",
-      requiredChains: ["eip155:8453", "eip155:1"],
+      requiredChains: ["eip155:8453"],
       castShareUrl: `${APP_URL}/share`,
     },
     baseBuilder: {
