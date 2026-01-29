@@ -20,7 +20,7 @@ import { useCaptcha } from "@/hooks/useCaptcha";
 import { useHumanScore } from "@/hooks/useHumanScore";
 import { useUserBalance } from "@/hooks/useUserBalance";
 import { useUserData } from "@/hooks/useUserData";
-import { APP_URL } from "@/lib/constants";
+import { APP_OG_IMAGE_URL, APP_URL } from "@/lib/constants";
 import { notificationsBtn } from "@/lib/constants";
 import { truncateAddress } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -61,11 +61,11 @@ export function App() {
   const [nowTick, setNowTick] = useState(() => Date.now());
   const [isAddingMiniApp, setIsAddingMiniApp] = useState(false);
   const [isMiniAppAdded, setIsMiniAppAdded] = useState(() =>
-    Boolean(context?.client?.added)
+    Boolean(context?.client?.added),
   );
   const [isSendingNotification, setIsSendingNotification] = useState(false);
   const [notificationStatus, setNotificationStatus] = useState<string | null>(
-    null
+    null,
   );
   const [onboardingStep, setOnboardingStep] = useState<
     "intro" | "captcha" | "scoring" | "mint"
@@ -75,7 +75,7 @@ export function App() {
   const authFetch = useCallback(
     (...args: Parameters<typeof fetch>) =>
       quickAuth?.fetch ? quickAuth.fetch(...args) : fetch(...args),
-    [quickAuth]
+    [quickAuth],
   );
   const isAdmin = fid === 317261;
   const humanIdAddress = addresses.base.HumanId as `0x${string}`;
@@ -88,6 +88,14 @@ export function App() {
     address: humanIdAddress,
     abi: humanIdAbiTyped,
     functionName: "mintPrice",
+  });
+  const { data: humanIdOnchain } = useReadContract({
+    address: humanIdAddress,
+    abi: humanIdAbiTyped,
+    functionName: "humanIdOf",
+    args: fid ? [BigInt(fid)] : undefined,
+    chainId: 8453,
+    query: { enabled: Boolean(fid) },
   });
   const { data: claimCooldown } = useReadContract({
     address: pointsClaimAddress,
@@ -128,8 +136,12 @@ export function App() {
   } = useUserData(fid);
 
   const isOnboarding = !user.onboarded;
-  const minted = Boolean(user.humanIdMinted || user.humanId);
-  const mintedHumanId = user.humanId;
+  const onchainHumanId =
+    typeof humanIdOnchain === "string" && humanIdOnchain.length > 0
+      ? humanIdOnchain
+      : null;
+  const minted = Boolean(onchainHumanId || user.humanIdMinted || user.humanId);
+  const mintedHumanId = onchainHumanId || user.humanId;
 
   const { scoreLoading, scoreError, refreshScore } = useHumanScore(
     fid,
@@ -137,7 +149,7 @@ export function App() {
     (score) => {
       setHumanScore(score);
       setScoreUpdated(true);
-    }
+    },
   );
 
   const handleLevelUp = useCallback(() => {
@@ -367,7 +379,7 @@ export function App() {
         setIsSendingNotification(false);
       }
     },
-    [authFetch, isAdmin]
+    [authFetch, isAdmin],
   );
 
   const burnPointsAmount = claimPayload?.burnPoints
@@ -411,6 +423,7 @@ export function App() {
     claimAmountOnchain > BigInt(0) &&
     airdropRewardPool < claimAmountOnchain;
 
+  // Compose cast config for sharing Human ID
   const shareCastConfig = useMemo(() => {
     if (!fid || !mintedHumanId) return null;
     return {
@@ -418,7 +431,10 @@ export function App() {
       embeds: [
         {
           path: `/share/${fid}`,
-          imageUrl: async () => `${APP_URL}/api/og/humanid?fid=${fid}`,
+          imageUrl: async () => {
+            if (!fid) return APP_OG_IMAGE_URL;
+            return `${APP_URL}/api/og/humanid?fid=${fid}`;
+          },
         },
       ],
     };
@@ -431,7 +447,7 @@ export function App() {
     typeof claimCooldown === "bigint" ? Number(claimCooldown) : 0;
   const cooldownSeconds = Math.max(
     0,
-    lastClaimAtSeconds + cooldownSecondsValue - Math.floor(nowTick / 1000)
+    lastClaimAtSeconds + cooldownSecondsValue - Math.floor(nowTick / 1000),
   );
 
   const {
@@ -510,7 +526,7 @@ export function App() {
         setCaptchaError(null);
       }
     },
-    [captchaError, setCaptchaError, setAnswer]
+    [captchaError, setCaptchaError, setAnswer],
   );
 
   if (!onboardingChecked) {
@@ -745,7 +761,7 @@ export function App() {
               exit={{ opacity: 0, y: -12 }}
               className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-black text-primary"
             >
-              LEVEL UP!
+              SUCCESS!
             </motion.div>
           ) : null}
         </AnimatePresence>

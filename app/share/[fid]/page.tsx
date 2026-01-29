@@ -1,4 +1,4 @@
-import { APP_DESCRIPTION, APP_NAME, APP_URL } from '@/lib/constants'
+import { APP_DESCRIPTION, APP_NAME, APP_OG_IMAGE_URL, APP_URL } from '@/lib/constants'
 import { getMiniAppEmbedMetadata } from '@/lib/utils'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
@@ -15,11 +15,15 @@ export async function generateMetadata({
   params: { fid: string }
 }): Promise<Metadata> {
   const { fid } = params
+  const fidNumber = Number(fid)
+  const hasValidFid = Boolean(fidNumber && !Number.isNaN(fidNumber))
   const headerList = await headers()
   const host = headerList.get('x-forwarded-host') ?? headerList.get('host')
   const proto = headerList.get('x-forwarded-proto') ?? 'https'
   const baseUrl = host ? `${proto}://${host}` : APP_URL
-  const imageUrl = `${baseUrl}/api/og/humanid?fid=${fid}`
+  const imageUrl = hasValidFid
+    ? `${baseUrl}/api/og/humanid?fid=${fid}`
+    : APP_OG_IMAGE_URL
 
   return {
     title: `${APP_NAME} - Share`,
@@ -35,7 +39,9 @@ export async function generateMetadata({
       images: [imageUrl],
     },
     other: {
-      'fc:frame': JSON.stringify(getMiniAppEmbedMetadata(imageUrl)),
+      'fc:frame': JSON.stringify(
+        getMiniAppEmbedMetadata(imageUrl || APP_OG_IMAGE_URL),
+      ),
     },
   }
 }
