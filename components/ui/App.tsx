@@ -33,6 +33,7 @@ import {
   usePublicClient,
   useReadContract,
   useSwitchChain,
+  useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
 
@@ -58,6 +59,7 @@ export function App() {
   const [claimToken, setClaimToken] = useState<string | null>(null);
   const [isClaimingPoints, setIsClaimingPoints] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
+  const [claimTxHash, setClaimTxHash] = useState<`0x${string}` | null>(null);
   const [nowTick, setNowTick] = useState(() => Date.now());
   const [isAddingMiniApp, setIsAddingMiniApp] = useState(false);
   const [isMiniAppAdded, setIsMiniAppAdded] = useState(() =>
@@ -125,6 +127,15 @@ export function App() {
       args: fid ? [BigInt(fid)] : undefined,
       query: { enabled: Boolean(fid) },
     });
+  const {
+    isLoading: isClaimPending,
+    isSuccess: isClaimConfirmed,
+    isError: isClaimFailed,
+  } = useWaitForTransactionReceipt({
+    hash: claimTxHash ?? undefined,
+    chainId: 8453,
+    query: { enabled: Boolean(claimTxHash) },
+  });
 
   const {
     user,
@@ -281,69 +292,6 @@ export function App() {
     }
   }, [actions]);
 
-  const handleClaimPoints = useCallback(async () => {
-    if (!claimToken) return;
-    if (!address) {
-      setClaimError("CONNECT WALLET.");
-      return;
-    }
-    if (chainId !== 8453) {
-      setClaimError("SWITCH TO BASE MAINNET.");
-      return;
-    }
-    setIsClaimingPoints(true);
-    setClaimError(null);
-    try {
-      const res = await authFetch("/api/signature/points-claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userAddress: address, claimToken }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data?.isSuccess) {
-        const message = data?.error
-          ? String(data.error).toUpperCase()
-          : "CLAIM UNAVAILABLE.";
-        setClaimError(message);
-        setClaimToken(null);
-        setCaptchaError(message);
-        return;
-      }
-      await writeContractAsync({
-        address: pointsClaimAddress,
-        abi: pointsClaimAbiTyped,
-        functionName: "claim",
-        args: [
-          BigInt(data.fid),
-          BigInt(data.nonce),
-          BigInt(data.amount),
-          BigInt(data.deadline),
-          data.signature,
-        ],
-      });
-      await refetchPointsBalance();
-      await refetchLastClaimAt();
-      setClaimToken(null);
-    } catch (error) {
-      console.error("points claim failed", error);
-      setClaimError("CLAIM FAILED.");
-      setClaimToken(null);
-      setCaptchaError("CLAIM FAILED.");
-    } finally {
-      setIsClaimingPoints(false);
-    }
-  }, [
-    address,
-    authFetch,
-    chainId,
-    claimToken,
-    pointsClaimAbiTyped,
-    pointsClaimAddress,
-    refetchPointsBalance,
-    refetchLastClaimAt,
-    writeContractAsync,
-  ]);
-
   const handleSendNotification = useCallback(
     async (notification: {
       id: number;
@@ -477,6 +425,91 @@ export function App() {
     },
     onSolved: handleLevelUp,
   });
+
+  const handleClaimPoints = useCallback(async () => {
+    if (!claimToken) return;
+    if (claimTxHash) return;
+    if (!address) {
+      setClaimError("CONNECT WALLET.");
+      return;
+    }
+    if (chainId !== 8453) {
+      setClaimError("SWITCH TO BASE MAINNET.");
+      return;
+    }
+    setIsClaimingPoints(true);
+    setClaimError(null);
+    try {
+      const res = await authFetch("/api/signature/points-claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userAddress: address, claimToken }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.isSuccess) {
+        const message = data?.error
+          ? String(data.error).toUpperCase()
+          : "CLAIM UNAVAILABLE.";
+        setClaimError(message);
+        setClaimToken(null);
+        setCaptchaError(message);
+        return;
+      }
+      const hash = await writeContractAsync({
+        address: pointsClaimAddress,
+        abi: pointsClaimAbiTyped,
+        functionName: "claim",
+        args: [
+          BigInt(data.fid),
+          BigInt(data.nonce),
+          BigInt(data.amount),
+          BigInt(data.deadline),
+          data.signature,
+        ],
+      });
+      setClaimTxHash(hash);
+    } catch (error) {
+      console.error("points claim failed", error);
+      setClaimError("CLAIM FAILED.");
+      setClaimToken(null);
+      setCaptchaError("CLAIM FAILED.");
+    } finally {
+      setIsClaimingPoints(false);
+    }
+  }, [
+    address,
+    authFetch,
+    chainId,
+    claimTxHash,
+    claimToken,
+    pointsClaimAbiTyped,
+    pointsClaimAddress,
+    setCaptchaError,
+    writeContractAsync,
+  ]);
+
+  useEffect(() => {
+    if (!claimTxHash) return;
+    if (isClaimConfirmed) {
+      refetchPointsBalance();
+      refetchLastClaimAt();
+      setClaimToken(null);
+      setClaimTxHash(null);
+      return;
+    }
+    if (isClaimFailed) {
+      setClaimError("CLAIM FAILED.");
+      setCaptchaError("CLAIM FAILED.");
+      setClaimTxHash(null);
+    }
+  }, [
+    claimTxHash,
+    isClaimConfirmed,
+    isClaimFailed,
+    refetchLastClaimAt,
+    refetchPointsBalance,
+    setCaptchaError,
+  ]);
 
   useEffect(() => {
     if (!mintError) return;
@@ -616,7 +649,7 @@ export function App() {
                 errorMessage={captchaError}
                 claimReady={Boolean(claimToken)}
                 claimError={claimError}
-                isClaiming={isClaimingPoints}
+                isClaiming={isClaimingPoints || isClaimPending}
                 cooldownSeconds={cooldownSeconds}
                 onAnswerChange={setAnswer}
                 onVerify={handleSolve}
