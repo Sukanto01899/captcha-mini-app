@@ -1,7 +1,9 @@
 import { APP_NAME } from "@/lib/constants";
 import humanIdAbi from "@/contracts/abi/HumanId.json";
 import addresses from "@/contracts/addresses.json";
+import dbConnect from "@/lib/db";
 import { getNeynarUser } from "@/lib/neynar";
+import { UserModel } from "@/models/User";
 import { ImageResponse } from "@vercel/og";
 import type { NextRequest } from "next/server";
 import { type Abi, createPublicClient, http } from "viem";
@@ -18,7 +20,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const fidParam = searchParams.get("fid");
 
-    console.log(fidParam);
     const fid =
       fidParam && fidParam !== "undefined" && fidParam !== "null"
         ? Number(fidParam)
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     const hasValidFid = Boolean(fid && !Number.isNaN(fid));
 
     let isMinted = false;
+    let humanScore: number | null = null;
     if (hasValidFid) {
       try {
         const rpcUrl =
@@ -43,6 +45,17 @@ export async function GET(request: NextRequest) {
         isMinted = typeof humanId === "string" && humanId.length > 0;
       } catch (error) {
         console.error("HumanID OG onchain read failed:", error);
+      }
+    }
+
+    if (hasValidFid) {
+      try {
+        await dbConnect();
+        const user = await UserModel.findOne({ fid }).lean();
+        humanScore =
+          typeof user?.humanScore === "number" ? user.humanScore : null;
+      } catch (error) {
+        console.error("HumanID OG score lookup failed:", error);
       }
     }
 
@@ -88,12 +101,20 @@ export async function GET(request: NextRequest) {
             alignItems: "center",
             justifyContent: "center",
             background:
-              "linear-gradient(135deg, rgba(0,0,0,0.96), rgba(8,16,12,0.98))",
+              "radial-gradient(circle at top left, rgba(0,255,65,0.25), rgba(0,0,0,0.95))",
             color: "#00ff41",
             fontFamily: "Inter, system-ui, sans-serif",
             position: "relative",
           }}
         >
+          <div
+            style={{
+              position: "absolute",
+              inset: "24px",
+              border: "2px dashed rgba(0,255,65,0.35)",
+              display: "flex",
+            }}
+          />
           <div
             style={{
               display: "flex",
@@ -102,13 +123,13 @@ export async function GET(request: NextRequest) {
               border: "6px solid #00ff41",
               padding: "36px 48px",
               textAlign: "center",
-              boxShadow: "10px 10px 0px #000",
-              background: "#0b0b0b",
+              boxShadow: "12px 12px 0px #000",
+              background: "rgba(11,11,11,0.92)",
             }}
           >
             <p
               style={{
-                fontSize: "22px",
+                fontSize: "20px",
                 letterSpacing: "2px",
                 margin: "0 0 12px 0",
               }}
@@ -117,7 +138,7 @@ export async function GET(request: NextRequest) {
             </p>
             <p
               style={{
-                fontSize: "42px",
+                fontSize: "40px",
                 margin: "0 0 16px 0",
                 fontWeight: 800,
               }}
@@ -126,7 +147,7 @@ export async function GET(request: NextRequest) {
             </p>
             <p
               style={{
-                fontSize: "18px",
+                fontSize: "16px",
                 margin: 0,
                 color: "rgba(255,255,255,0.7)",
               }}
@@ -146,6 +167,15 @@ export async function GET(request: NextRequest) {
     }
 
     const fidLabel = hasValidFid ? `#${fid}` : "#----";
+    const scoreValue = Math.max(0, Math.min(100, humanScore ?? 0));
+    const scoreLabel =
+      scoreValue >= 85
+        ? "ELITE"
+        : scoreValue >= 60
+          ? "TRUSTED"
+          : scoreValue >= 40
+            ? "VERIFIED"
+            : "RISK";
 
     return new ImageResponse(
       <div
@@ -156,21 +186,31 @@ export async function GET(request: NextRequest) {
           alignItems: "center",
           justifyContent: "center",
           background:
-            "radial-gradient(circle at top left, rgba(0,255,65,0.2), rgba(0,0,0,0.95))",
+            "linear-gradient(135deg, rgba(4,10,8,0.98), rgba(0,0,0,0.95))",
           fontFamily: "Inter, system-ui, sans-serif",
-          padding: "40px",
+          padding: "32px",
+          position: "relative",
+          color: "#ffffff",
         }}
       >
+        <div
+          style={{
+            position: "absolute",
+            inset: "18px",
+            border: "2px solid rgba(0,255,65,0.25)",
+            display: "flex",
+          }}
+        />
         <div
           style={{
             width: "100%",
             maxWidth: "980px",
             border: "6px solid #00ff41",
-            background: "#0b0b0b",
-            boxShadow: "12px 12px 0px #000",
+            background: "rgba(11,11,11,0.9)",
+            boxShadow: "14px 14px 0px #000",
             display: "flex",
-            gap: "32px",
-            padding: "36px",
+            gap: "28px",
+            padding: "28px",
             alignItems: "center",
           }}
         >
@@ -182,7 +222,8 @@ export async function GET(request: NextRequest) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "#111",
+              background: "#0f0f0f",
+              position: "relative",
             }}
           >
             {pfpUrl ? (
@@ -192,25 +233,64 @@ export async function GET(request: NextRequest) {
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
             ) : (
-              <div style={{ fontSize: "18px", color: "#00ff41" }}>NO PFP</div>
+              <div style={{ fontSize: "16px", color: "#00ff41" }}>NO PFP</div>
             )}
+            <div
+              style={{
+                position: "absolute",
+                right: "-14px",
+                top: "-14px",
+                background: "#ff004d",
+                color: "#fff",
+                fontSize: "12px",
+                fontWeight: 700,
+                padding: "6px 10px",
+                border: "2px solid #000",
+              }}
+            >
+              MINTED
+            </div>
           </div>
 
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              flex: 1,
+            }}
           >
-            <p
+            <div
               style={{
-                fontSize: "18px",
-                letterSpacing: "3px",
-                color: "#00ff41",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
-              HUMAN ID CARD
-            </p>
+              <p
+                style={{
+                  fontSize: "16px",
+                  letterSpacing: "3px",
+                  color: "#00ff41",
+                  margin: 0,
+                }}
+              >
+                HUMAN ID CARD
+              </p>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "#00ff41",
+                  border: "1px solid rgba(0,255,65,0.5)",
+                  padding: "4px 10px",
+                }}
+              >
+                {fidLabel}
+              </div>
+            </div>
             <p
               style={{
-                fontSize: "46px",
+                fontSize: "36px",
                 margin: 0,
                 color: "#ffffff",
                 fontWeight: 800,
@@ -218,29 +298,71 @@ export async function GET(request: NextRequest) {
             >
               {displayName.toUpperCase()}
             </p>
-            <p
-              style={{
-                fontSize: "28px",
-                margin: 0,
-                color: "#ff004d",
-                fontWeight: 700,
-              }}
-            >
-              {displayName.toUpperCase()} {fidLabel}
-            </p>
+
             <div
               style={{
-                marginTop: "8px",
+                marginTop: "6px",
+                padding: "12px 14px",
+                border: "2px solid #00ff41",
+                background: "rgba(0,255,65,0.08)",
                 display: "flex",
-                gap: "12px",
-                alignItems: "center",
-                color: "rgba(255,255,255,0.7)",
-                fontSize: "18px",
+                flexDirection: "column",
               }}
             >
-              <span>FID {fidLabel}</span>
-              <span>-</span>
-              <span>VERIFIED HUMAN</span>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span style={{ fontSize: "12px", color: "#c9ffd8" }}>
+                  HUMAN SCORE
+                </span>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    color: "#0b0b0b",
+                    background: "#00ff41",
+                    padding: "2px 8px",
+                    fontWeight: 700,
+                  }}
+                >
+                  {scoreLabel}
+                </span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: "8px",
+                  marginTop: "6px",
+                }}
+              >
+                <span style={{ fontSize: "28px", fontWeight: 800 }}>
+                  {scoreValue}
+                </span>
+                <span style={{ fontSize: "12px", color: "#c9ffd8" }}>
+                  / 100
+                </span>
+              </div>
+              <div
+                style={{
+                  marginTop: "8px",
+                  height: "8px",
+                  border: "1px solid #00ff41",
+                  background: "#0b0b0b",
+                  display: "flex",
+                }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${scoreValue}%`,
+                    background: "#00ff41",
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>

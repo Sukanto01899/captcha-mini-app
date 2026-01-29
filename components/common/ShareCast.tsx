@@ -91,7 +91,9 @@ export function ShareCast({
             // If custom image generator is provided, use it
             if (embed.imageUrl) {
               const imageUrl = await embed.imageUrl()
-              url.searchParams.set('share_image_url', imageUrl)
+              if (imageUrl) {
+                url.searchParams.set('share_image_url', imageUrl)
+              }
             }
 
             return url.toString()

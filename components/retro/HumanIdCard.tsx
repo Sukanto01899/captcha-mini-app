@@ -1,7 +1,7 @@
 "use client";
 
 import { ShareCast } from "@/components/common/ShareCast";
-import { Lock, Trophy } from "lucide-react";
+import { CircleQuestionMark, Lock, Trophy } from "lucide-react";
 import type { ComponentProps } from "react";
 
 type ShareCastConfig = ComponentProps<typeof ShareCast>["cast"];
@@ -46,7 +46,27 @@ export function HumanIdCard({
       <div className="relative rounded-xl border-4 border-border bg-card p-4 shadow-[4px_4px_0px_#000]">
         <div className="mb-2 flex items-center justify-between text-[10px]">
           <span>CENTRAL CARD</span>
-          <Trophy className="h-4 w-4 text-primary" />
+          <div className="flex items-center gap-2">
+            <div className="relative group">
+              <button
+                type="button"
+                aria-label="How to increase score"
+                className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-border bg-card text-[10px] text-primary shadow-[2px_2px_0px_#000]"
+              >
+                <CircleQuestionMark size={30} />
+              </button>
+              <div className="pointer-events-none absolute right-0 top-6 z-10 w-56 rounded-md border-2 border-border bg-background p-2 text-[9px] text-secondary opacity-0 shadow-[4px_4px_0px_#000] transition-opacity group-hover:opacity-100">
+                <p className="text-primary">Increase score:</p>
+                <p>• Grow followers/following</p>
+                <p>• Post casts + comments</p>
+                <p>• Get likes</p>
+                <p>• Keep account older</p>
+                <p>• Hold power badge</p>
+                <p>• Hold funds in wallet</p>
+                <p>• Keep spam label clean</p>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border-4 border-border bg-background p-4 shadow-[4px_4px_0px_#000]">
           {minted ? (

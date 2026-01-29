@@ -15,11 +15,11 @@ export const APP_NAME = "Captcha";
 export const APP_DESCRIPTION =
   "Verify once, mint a HumanID badge, earn PTS and meme tokens on Base.";
 export const APP_OG_IMAGE_URL = `${APP_URL}/feed.png`;
-export const APP_BUTTON_TEXT = "Get Human ID";
+export const APP_BUTTON_TEXT = "Check Human Score";
 export const APP_SPLASH_URL = `${APP_URL}/splash.png`;
 export const APP_ICON_URL = `${APP_URL}/icon.png`;
 export const APP_SPLASH_BACKGROUND_COLOR = "#0d0820";
-export const APP_PRIMARY_CATEGORY = "games";
+export const APP_PRIMARY_CATEGORY = "social";
 export const APP_TAGS = ["captcha", "security", "farcaster", "base", "humanid"];
 export const APP_WEBHOOK_URL = `${APP_URL}/api/webhook`;
 export const APP_ACCOUNT_ASSOCIATION = {

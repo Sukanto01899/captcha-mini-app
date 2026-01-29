@@ -425,18 +425,13 @@ export function App() {
 
   // Compose cast config for sharing Human ID
   const shareCastConfig = useMemo(() => {
-    if (!fid || !mintedHumanId) return null;
+    const fidValue =
+      typeof fid === "number" && Number.isFinite(fid) && fid > 0 ? fid : null;
+    if (!fidValue || !mintedHumanId) return null;
     return {
-      text: `HUMAN ID ${mintedHumanId}. VERIFIED HUMAN ON CAPTCHA.`,
-      embeds: [
-        {
-          path: `/share/${fid}`,
-          imageUrl: async () => {
-            if (!fid) return APP_OG_IMAGE_URL;
-            return `${APP_URL}/api/og/humanid?fid=${fid}`;
-          },
-        },
-      ],
+      text: `Just minted my Human ID: ${mintedHumanId}. ✅\n\nCheck your Human Score and mint yours now`,
+      bestFriends: true,
+      embeds: [`${APP_URL}/share/${fidValue}`],
     };
   }, [fid, mintedHumanId]);
 

@@ -1,4 +1,5 @@
 import pointsTokenAbi from '@/contracts/abi/PointsToken.json'
+import humanIdAbi from '@/contracts/abi/HumanId.json'
 import addresses from '@/contracts/addresses.json'
 import dbConnect from '@/lib/db'
 import { AirdropConfigModel } from '@/models/AirdropConfig'
@@ -86,7 +87,27 @@ export async function POST(request: NextRequest) {
   }
 
   const user = await UserModel.findOne({ fid })
-  const hasHumanId = Boolean(user?.humanIdMinted || user?.humanId)
+
+  const rpcUrl = process.env.ALCHEMY_RPC_URL || 'https://mainnet.base.org'
+  const client = createPublicClient({
+    chain: base,
+    transport: http(rpcUrl),
+  })
+
+  let hasHumanId = false
+  if (requireHumanId) {
+    try {
+      const humanId = await client.readContract({
+        address: addresses.base.HumanId as `0x${string}`,
+        abi: humanIdAbi as Abi,
+        functionName: 'humanIdOf',
+        args: [BigInt(fid)],
+      })
+      hasHumanId = typeof humanId === 'string' && humanId.length > 0
+    } catch (error) {
+      console.error('Eligibility humanIdOf failed:', error)
+    }
+  }
   if (requireHumanId && !hasHumanId) {
     return NextResponse.json(
       { eligible: false, error: 'Human ID required' },
@@ -98,11 +119,6 @@ export async function POST(request: NextRequest) {
   const minScore = Number(minScoreSetting)
   const score = user?.humanScore || 0
 
-  const rpcUrl = process.env.ALCHEMY_RPC_URL || 'https://mainnet.base.org'
-  const client = createPublicClient({
-    chain: base,
-    transport: http(rpcUrl),
-  })
   const [balance, onchainClaimAmount, onchainMinPoints] = await Promise.all([
     client.readContract({
       address: POINTS_TOKEN_CONTRACT as `0x${string}`,
