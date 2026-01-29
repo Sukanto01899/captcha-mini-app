@@ -1,3 +1,5 @@
+'use client'
+
 import type { Context } from '@farcaster/miniapp-sdk'
 import sdk from '@farcaster/miniapp-sdk'
 import { useQuery } from '@tanstack/react-query'
@@ -47,7 +49,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
       const context = await Promise.race([
         sdk.context,
         new Promise<undefined>((resolve) =>
-          setTimeout(() => resolve(undefined), 3000),
+          setTimeout(() => resolve(undefined), 10000),
         ),
       ] as const)
 
@@ -59,7 +61,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
           isReady = await Promise.race([
             sdk.actions.ready().then(() => true),
             new Promise<boolean>((resolve) =>
-              setTimeout(() => resolve(false), 3000),
+              setTimeout(() => resolve(false), 8000),
             ),
           ] as const)
         } catch (err) {
@@ -75,6 +77,10 @@ export function FrameProvider({ children }: FrameProviderProps) {
 
       return { context, isReady }
     },
+    enabled: typeof window !== 'undefined',
+    staleTime: 0,
+    retry: (failureCount) => failureCount < 3,
+    retryDelay: (attempt) => Math.min(2000 * 2 ** attempt, 8000),
   })
 
   const isReady = farcasterContextQuery.data?.isReady ?? false
