@@ -78,6 +78,12 @@ export async function POST(request: NextRequest) {
       error: 'Airdrop not configured',
     })
   }
+  if (typeof rewardAmount === 'string' && !/^\d+$/.test(rewardAmount.trim())) {
+    return NextResponse.json({
+      eligible: false,
+      error: 'Airdrop claim amount invalid',
+    })
+  }
 
   if (paused) {
     return NextResponse.json(

@@ -5,6 +5,7 @@ import { Button } from "@/components/common/Button";
 const pixelButtonStyle = { boxShadow: "4px 4px 0px #000" } as const;
 
 interface AirdropTabProps {
+  tokenName?: string;
   poolAmount?: string;
   claimAmount?: string;
   claimedAmount?: string;
@@ -30,6 +31,7 @@ interface AirdropTabProps {
 }
 
 export function AirdropTab({
+  tokenName,
   poolAmount = "0",
   claimAmount = "0",
   claimedAmount = "0",
@@ -105,11 +107,17 @@ export function AirdropTab({
       <div className="mt-3 rounded-xl border-4 border-border bg-background p-4 shadow-[4px_4px_0px_#000]">
         <div className="flex items-center justify-between text-[10px] text-secondary">
           <span>TOTAL POOL</span>
-          <span className="text-primary">{poolAmount}</span>
+          <span className="text-primary">
+            {poolAmount}
+            {tokenName ? ` ${tokenName}` : ""}
+          </span>
         </div>
         <div className="mt-2 flex items-center justify-between text-[10px] text-secondary">
           <span>CLAIM PER</span>
-          <span className="text-primary">{claimAmount}</span>
+          <span className="text-primary">
+            {claimAmount}
+            {tokenName ? ` ${tokenName}` : ""}
+          </span>
         </div>
         <div className="mt-2 flex items-center justify-between text-[10px] text-secondary">
           <span>CLAIMED</span>

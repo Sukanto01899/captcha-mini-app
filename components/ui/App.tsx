@@ -39,6 +39,17 @@ import {
 
 type TabKey = "captcha" | "profile" | "airdrop" | "admin";
 
+const toSafeBigInt = (value?: string) => {
+  if (typeof value !== "string") return BigInt(0);
+  const trimmed = value.trim();
+  if (!/^\d+$/.test(trimmed)) return BigInt(0);
+  try {
+    return BigInt(trimmed);
+  } catch {
+    return BigInt(0);
+  }
+};
+
 export function App() {
   const { context, actions, isEthProviderAvailable, quickAuth } = useFrame();
   const fid = context?.user?.fid;
@@ -359,9 +370,7 @@ export function App() {
     burnPointsAmount > BigInt(0) &&
     (typeof pointsAllowance === "bigint" ? pointsAllowance : BigInt(0)) <
       burnPointsAmount;
-  const claimAmountOnchain = airdropConfig.claimAmount
-    ? BigInt(airdropConfig.claimAmount)
-    : BigInt(0);
+  const claimAmountOnchain = toSafeBigInt(airdropConfig.claimAmount);
   const claimAmountDisplay = airdropConfig.claimAmount;
   const claimedAmountDisplay = airdropClaimed ? claimAmountDisplay : "0";
   const poolDisplay = airdropConfig.poolAmount;
@@ -682,6 +691,7 @@ export function App() {
             ) : null}
             {tab === "airdrop" ? (
               <AirdropTab
+                tokenName={airdropConfig.tokenName}
                 poolAmount={airdropLoading ? "LOADING..." : poolDisplay}
                 claimAmount={claimAmountDisplay ?? airdropConfig.claimAmount}
                 claimedAmount={claimedAmountDisplay}
@@ -727,6 +737,7 @@ export function App() {
             {tab === "admin" && isAdmin ? (
               <AdminTab
                 fid={fid}
+                tokenName={draft?.tokenName ?? airdropConfig.tokenName}
                 poolAmount={draft?.poolAmount ?? airdropConfig.poolAmount}
                 claimAmount={draft?.claimAmount ?? airdropConfig.claimAmount}
                 minPoints={draft?.minPoints ?? airdropConfig.minPoints}

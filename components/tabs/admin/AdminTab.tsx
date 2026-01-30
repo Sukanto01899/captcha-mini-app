@@ -2,6 +2,7 @@
 
 interface AdminTabProps {
   fid?: number
+  tokenName: string
   poolAmount: string
   claimAmount: string
   minPoints: number
@@ -17,6 +18,7 @@ interface AdminTabProps {
   }>
   onUpdateConfig: (
     update: Partial<{
+      tokenName: string
       poolAmount: string
       claimAmount: string
       minPoints: number
@@ -42,6 +44,7 @@ interface AdminTabProps {
 
 export function AdminTab({
   fid,
+  tokenName,
   poolAmount,
   claimAmount,
   minPoints,
@@ -67,7 +70,17 @@ export function AdminTab({
 
       <div className="mt-3 grid gap-3">
         <label className="grid gap-1 text-secondary">
-          TOTAL POOL
+          AIRDROP TOKEN NAME
+          <input
+            className="rounded-md border-2 border-border bg-background px-3 py-2 text-xs text-primary"
+            value={tokenName}
+            onChange={(event) =>
+              onUpdateConfig({ tokenName: event.target.value })
+            }
+          />
+        </label>
+        <label className="grid gap-1 text-secondary">
+          TOTAL POOL TOKEN
           <input
             className="rounded-md border-2 border-border bg-background px-3 py-2 text-xs text-primary"
             value={poolAmount}
@@ -77,7 +90,7 @@ export function AdminTab({
           />
         </label>
         <label className="grid gap-1 text-secondary">
-          CLAIM AMOUNT
+          CLAIM AMOUNT TOKEN
           <input
             className="rounded-md border-2 border-border bg-background px-3 py-2 text-xs text-primary"
             value={claimAmount}

@@ -2,6 +2,7 @@ import mongoose, { Schema, type Document, type Model } from 'mongoose'
 
 export interface IAirdropConfig extends Document {
   key: string
+  tokenName: string
   poolAmount: string
   claimAmount: string
   minPoints: number
@@ -17,6 +18,7 @@ export interface IAirdropConfig extends Document {
 const AirdropConfigSchema = new Schema<IAirdropConfig>(
   {
     key: { type: String, unique: true, default: 'active' },
+    tokenName: { type: String, default: '' },
     poolAmount: { type: String, default: '0' },
     claimAmount: { type: String, default: '0' },
     minPoints: { type: Number, default: 0 },

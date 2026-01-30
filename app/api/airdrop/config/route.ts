@@ -3,12 +3,17 @@ import { AirdropConfigModel } from '@/models/AirdropConfig'
 import { type NextRequest, NextResponse } from 'next/server'
 
 const ADMIN_FID = 317261
+const isUintString = (value: string) => {
+  const trimmed = value.trim()
+  return trimmed.length > 0 && /^\d+$/.test(trimmed)
+}
 
 export async function GET() {
   await dbConnect()
   const config = (await AirdropConfigModel.findOne({
     key: 'active',
   }).lean()) || {
+    tokenName: '',
     poolAmount: '0',
     claimAmount: '0',
     minPoints: 0,
@@ -28,6 +33,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = (await request.json()) as Partial<{
+    tokenName: string
     poolAmount: string
     claimAmount: string
     minPoints: number
@@ -40,9 +46,27 @@ export async function POST(request: NextRequest) {
 
   await dbConnect()
   const update: Record<string, unknown> = {}
-  if (typeof body.poolAmount === 'string') update.poolAmount = body.poolAmount
-  if (typeof body.claimAmount === 'string')
-    update.claimAmount = body.claimAmount
+  if (typeof body.tokenName === 'string') {
+    update.tokenName = body.tokenName.trim()
+  }
+  if (typeof body.poolAmount === 'string') {
+    if (!isUintString(body.poolAmount)) {
+      return NextResponse.json(
+        { error: 'POOL AMOUNT MUST BE A WHOLE NUMBER' },
+        { status: 400 },
+      )
+    }
+    update.poolAmount = body.poolAmount.trim()
+  }
+  if (typeof body.claimAmount === 'string') {
+    if (!isUintString(body.claimAmount)) {
+      return NextResponse.json(
+        { error: 'CLAIM AMOUNT MUST BE A WHOLE NUMBER' },
+        { status: 400 },
+      )
+    }
+    update.claimAmount = body.claimAmount.trim()
+  }
   if (typeof body.minPoints === 'number') update.minPoints = body.minPoints
   if (typeof body.minScore === 'number') update.minScore = body.minScore
   if (typeof body.maxClaimsPerUser === 'number')
