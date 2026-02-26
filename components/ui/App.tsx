@@ -36,6 +36,7 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
+import { BUILDER_DATA_SUFFIX } from "@/lib/builder-code";
 
 type TabKey = "captcha" | "profile" | "airdrop" | "admin";
 
@@ -241,6 +242,7 @@ export function App() {
         functionName: "mintSelf",
         args: [BigInt(fid), humanId],
         value: price,
+        dataSuffix: BUILDER_DATA_SUFFIX,
       });
       await publicClient?.waitForTransactionReceipt({ hash });
       const owner = await publicClient?.readContract({
@@ -475,6 +477,7 @@ export function App() {
           BigInt(data.deadline),
           data.signature,
         ],
+        dataSuffix: BUILDER_DATA_SUFFIX,
       });
       setClaimTxHash(hash);
     } catch (error) {
